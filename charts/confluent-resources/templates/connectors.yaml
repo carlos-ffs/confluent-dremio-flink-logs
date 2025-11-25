@@ -4,6 +4,7 @@ metadata:
   name: fluent-bit-dremio-sink
 spec:
   class: "io.tabular.iceberg.connect.IcebergSinkConnector"
+  name: "iceberg-sink-connector"
   taskMax: 2
   connectClusterRef:
     name: connect
