@@ -6,8 +6,6 @@ spec:
   class: "io.tabular.iceberg.connect.IcebergSinkConnector"
   name: "iceberg-sink-connector"
   taskMax: 2
-  connectClusterRef:
-    name: connect
   configs:
     topics: "fluent-bit"
     iceberg.tables.dynamic-enabled: "true"
