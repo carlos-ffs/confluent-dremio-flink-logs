@@ -9,6 +9,6 @@ fluent-bit:
           topics fluent-bit
           rdkafka.security.protocol SASL_SSL
           rdkafka.sasl.mechanism PLAIN
-          rdkafka.sasl.username kafka
-          rdkafka.sasl.password kafka-secret
+          rdkafka.sasl.username fluent-bit-user
+          rdkafka.sasl.password fluent-bit-producer-secret
           rdkafka.enable.ssl.certificate.verification false
