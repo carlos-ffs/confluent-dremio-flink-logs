@@ -12,6 +12,8 @@ spec:
     patternType: LITERAL
     resourceType: Topic
   role: ResourceOwner
+  clusterScopeByIds:
+    kafkaClusterId: "YWQwYmFkZDUtZmQ0Yy00MQ"
   kafkaRestClassRef:
     name: default
     namespace: {{ .Release.Namespace }}
