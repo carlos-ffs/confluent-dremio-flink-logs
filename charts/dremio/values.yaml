@@ -154,7 +154,6 @@ dremio-helm:
       location: s3://dremio/catalog
       type: "s3"
       s3:
-        bucketName: *dremioBucketName
         endpoint: http://minio.dremio.svc.cluster.local:9000
         useAccessKeys: true
         secretName: catalog-minio-secret
