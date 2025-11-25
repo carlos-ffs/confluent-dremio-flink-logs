@@ -5,7 +5,7 @@ fluent-bit:
       [OUTPUT]
           name kafka
           match *
-          brokers kafka-bootstrap-np.confluent.svc.cluster.local:9092
+          brokers kafka.confluent.svc.cluster.local:9092
           topics fluent-bit
           rdkafka.security.protocol SASL_SSL
           rdkafka.sasl.mechanism PLAIN
