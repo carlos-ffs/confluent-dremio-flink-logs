@@ -33,3 +33,16 @@ spec:
   kafkaRestClassRef:
     name: default
     namespace: {{ .Release.Namespace }}
+---
+apiVersion: platform.confluent.io/v1beta1
+kind: ConfluentRolebinding
+metadata:
+  name: kafka-connect-rbac
+  namespace: {{ .Release.Namespace }}
+spec:
+  principal:
+    name: kafka
+    type: user
+  role: SystemAdmin
+  clusclustersScopeByIds:
+    connectClusterId: confluent.connect
