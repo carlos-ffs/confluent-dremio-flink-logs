@@ -1,0 +1,34 @@
+apiVersion: argoproj.io/v1alpha1
+kind: ApplicationSet
+metadata:
+  name: minio-appset
+spec:
+  generators:
+  - list:
+      elements:
+      - cluster: docker-k8s
+        url: https://kubernetes.default.svc
+  template:
+    metadata:
+      name: 'minio-{{cluster}}'
+    spec:
+      project: local-project
+      source:
+        repoURL: https://github.com/carlos-ffs/argocd-dremio-workflows-events.git
+        targetRevision: HEAD
+        path: charts/minio
+        helm:
+          valueFiles: 
+          - values.yaml
+      destination:
+        server: '{{url}}'
+        namespace: minio
+      syncPolicy:
+        automated:
+          prune: true  # Automatically delete resources that no longer exist in Git
+          selfHeal: true  # Automatically sync if drift is detected
+          allowEmpty: false  # Allows deleting all resources when they are no longer in Git
+        syncOptions:
+        - CreateNamespace=true
+  syncPolicy:
+    preserveResourcesOnDeletion: true
