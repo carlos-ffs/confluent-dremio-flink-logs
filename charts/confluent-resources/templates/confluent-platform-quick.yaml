@@ -59,6 +59,11 @@ spec:
       tls:
         enabled: true
     external:
+      externalAccess:
+        type: nodePort
+        nodePort:
+          nodePortOffset: 30000
+          host: localhost
       authentication:
         type: plain
         jaasConfig:
