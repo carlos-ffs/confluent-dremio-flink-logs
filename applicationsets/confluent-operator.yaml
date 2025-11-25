@@ -21,7 +21,7 @@ spec:
           releaseName: confluent-operator
           values: |
             namespaceList:
-            - name: confluent
+            - confluent
       destination:
         server: '{{url}}'
         namespace: confluent
