@@ -1,0 +1,18 @@
+# Ensure all text files use LF line endings
+* text=auto eol=lf
+
+# Explicitly set YAML files to use LF (critical for Kubernetes secrets)
+*.yaml text eol=lf
+*.yml text eol=lf
+
+# Shell scripts must use LF
+*.sh text eol=lf
+
+# Ensure properties files use LF
+*.properties text eol=lf
+
+# PEM certificates and keys must use LF
+*.pem text eol=lf
+*.crt text eol=lf
+*.key text eol=lf
+
