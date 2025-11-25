@@ -121,8 +121,10 @@ dremio-helm:
       path: "/dremio-dist"
       authentication: "accessKeySecret"
       credentials:
-        accessKey: *dremioMinioUser
-        secret: *dremioMinioPassword
+        #accessKey: *dremioMinioUser
+        #secret: *dremioMinioPassword
+        accessKey: "minio"
+        secret: "minio123"
       extraProperties: |
         <property>
           <name>fs.s3a.endpoint</name>
