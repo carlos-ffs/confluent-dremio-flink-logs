@@ -156,6 +156,7 @@ dremio-helm:
       s3:
         endpoint: http://minio.dremio.svc.cluster.local:9000
         useAccessKeys: true
+        roleArn: arn:aws:iam::000000000000:role/catalog-access-role
         secretName: catalog-minio-secret
         skipSts: true
         pathStyleAccess: true
