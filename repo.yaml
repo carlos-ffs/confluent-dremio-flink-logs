@@ -1,7 +1,7 @@
 apiVersion: v1
 kind: Secret
 metadata:
-  name: priv-repo-confluent-flink-dremio-logs
+  name: priv-repo-confluent-dremio-flink-logs
   namespace: argocd
   annotations:
     managed-by: argocd.argoproj.io
@@ -9,6 +9,6 @@ metadata:
     argocd.argoproj.io/secret-type: repo-creds
 stringData:
   type: git
-  url: https://github.com/carlos-ffs/confluent-flink-dremio-logs.git
+  url: https://github.com/carlos-ffs/confluent-dremio-flink-logs.git
   password: <YOUR_PASSWORD>
   username: <YOUR_USERNAME>
