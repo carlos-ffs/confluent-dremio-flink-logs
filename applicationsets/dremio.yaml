@@ -27,7 +27,7 @@ spec:
         automated:
           prune: true  # Automatically delete resources that no longer exist in Git
           selfHeal: true  # Automatically sync if drift is detected
-          allowEmpty: false  # Allows deleting all resources when they are no longer in Git
+          allowEmpty: true  # Allows deleting all resources when they are no longer in Git
         syncOptions:
         - CreateNamespace=true
         - RespectIgnoreDifferences=true
@@ -43,5 +43,3 @@ spec:
         kind: PerconaServerMongoDB
         jqPathExpressions:
         - .spec.replsets[].sidecars[]
-  syncPolicy:
-    preserveResourcesOnDeletion: true

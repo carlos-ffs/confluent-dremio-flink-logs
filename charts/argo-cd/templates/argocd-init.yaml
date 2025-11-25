@@ -12,6 +12,7 @@ spec:
   - 'https://grafana.github.io/helm-charts'
   - 'oci://quay.io/dremio/dremio-helm'
   - 'https://charts.min.io/'
+  - 'https://packages.confluent.io/helm'
   destinations:
     # For simplicity
     - namespace: '*'
