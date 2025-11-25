@@ -4,11 +4,6 @@ apiVersion: batch/v1
 kind: Job
 metadata:
   name: {{ template "minio.fullname" .Subcharts.minio }}-wait-for-job
-  labels:
-    app: {{ template "minio.name" .Subcharts.minio }}-wait-for-job
-    chart: {{ template "minio.chart" .Subcharts.minio }}
-    release: {{ .Release.Name }}
-    heritage: {{ .Release.Service }}
 spec:
   ttlSecondsAfterFinished: 10
   template:
