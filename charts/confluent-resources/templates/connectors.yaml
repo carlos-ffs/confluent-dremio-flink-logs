@@ -14,7 +14,7 @@ spec:
     iceberg.tables.route-field: "table"
     iceberg.tables.auto-create-enabled: "true"
     iceberg.catalog.io-impl: "org.apache.iceberg.aws.s3.S3FileIO"
-    iceberg.catalog.uri: "http://dremio-catalog-server.dremio.svc.cluster.local:9181/api/catalog/v1"
+    iceberg.catalog.uri: "http://dremio-catalog-server.dremio.svc.cluster.local:9181"
     iceberg.catalog.ref: "main"
     iceberg.catalog.type: "rest"
     iceberg.catalog.credential: "dremio:dremio123"
