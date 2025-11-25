@@ -16,7 +16,7 @@ minio:
   buckets:
   - name: &dremioBucketName "dremio"
     policy: none
-    purge: true
+    purge: false
     versioning: false
     objectlocking: false
   svcaccts: 
