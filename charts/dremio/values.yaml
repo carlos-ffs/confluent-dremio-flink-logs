@@ -1,7 +1,7 @@
 # For samples source check this: https://community.dremio.com/t/cannot-access-dremio-samples-after-adding-minio-for-distributed-storager/12018/2
 
 minio:
-  enabled: false
+  enabled: true
   fullnameOverride: "minio"
   mode: standalone
   replicas: 1
@@ -25,7 +25,7 @@ minio:
     user: *minioRootUser
 
 dremio-helm:
-  enabled: false
+  enabled: true
   devMode: true # Needs to be set to true to define replicas 1 in mongodb.
   imagePullSecrets:
     - dremio-pull-secret
