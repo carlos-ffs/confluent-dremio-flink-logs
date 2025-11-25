@@ -152,7 +152,7 @@ dremio-helm:
         memory: "1Gi"
     storage:
       location: s3://dremio/catalog
-      type: S3
+      type: "s3"
       s3:
         bucketName: *dremioBucketName
         endpoint: http://minio.dremio.svc.cluster.local:9000
