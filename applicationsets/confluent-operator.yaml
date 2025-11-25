@@ -19,6 +19,9 @@ spec:
         targetRevision: 0.1351.24
         helm:
           releaseName: confluent-operator
+          values: |
+            namespaceList:
+            - name: confluent
       destination:
         server: '{{url}}'
         namespace: confluent
