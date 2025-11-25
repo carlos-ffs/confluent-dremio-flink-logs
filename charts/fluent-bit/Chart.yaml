@@ -1,0 +1,11 @@
+apiVersion: v2
+name: fluent-bit
+version: 1.0.0
+appVersion: v1.0.0
+kubeVersion: "^1.21.0-0"
+description: "Fluent bit umbrella chart"
+dependencies:
+  - name: fluent-bit
+    condition: fluent-bit.enabled
+    version: "0.54.0"
+    repository: https://fluent.github.io/helm-charts
