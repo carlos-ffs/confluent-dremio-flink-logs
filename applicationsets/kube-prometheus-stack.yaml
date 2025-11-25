@@ -14,7 +14,7 @@ spec:
     spec:
       project: local-project
       source:
-        repoURL: https://github.com/carlos-ffs/argocd-dremio-workflows-events.git
+        repoURL: https://github.com/carlos-ffs/confluent-dremio-flink-logs.git
         targetRevision: HEAD
         path: charts/prometheus
         helm:
