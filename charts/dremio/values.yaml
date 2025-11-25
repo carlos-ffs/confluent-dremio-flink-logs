@@ -150,6 +150,16 @@ dremio-helm:
       limits:
         cpu: "1500m"
         memory: "1Gi"
+    storage:
+      location: s3://dremio/catalog
+      type: S3
+      s3:
+        bucketName: *dremioBucketName
+        endpoint: http://minio.dremio.svc.cluster.local:9000
+        useAccessKeys: true
+        secret: catalog-minio-secret
+        skipSts: true
+        pathStyleAccess: true
     externalAccess:
       enabled: true
       replicas: 1
