@@ -15,3 +15,21 @@ spec:
   kafkaRestClassRef:
     name: default
     namespace: {{ .Release.Namespace }}
+---
+apiVersion: platform.confluent.io/v1beta1
+kind: ConfluentRolebinding
+metadata:
+  name: test-user-rbac
+  namespace: {{ .Release.Namespace }}
+spec:
+  principal:
+    name: test-user
+    type: user
+  resourcePatterns:
+  - name: "test-*"
+    patternType: PREFIXED
+    resourceType: Topic
+  role: ResourceOwner
+  kafkaRestClassRef:
+    name: default
+    namespace: {{ .Release.Namespace }}
