@@ -17,7 +17,7 @@ minio:
   - name: &dremioBucketName "dremio"
     policy: none
     purge: true
-    versioning: true
+    versioning: false
     objectlocking: false
   svcaccts: 
   - accessKey: &dremioMinioUser "dremio"
