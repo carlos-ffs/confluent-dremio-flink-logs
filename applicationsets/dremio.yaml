@@ -16,7 +16,7 @@ spec:
       source:
         repoURL: https://github.com/carlos-ffs/confluent-dremio-flink-logs.git
         targetRevision: HEAD
-        path: charts/dremio_v2
+        path: charts/dremio
         helm:
           valueFiles: 
           - values.yaml
