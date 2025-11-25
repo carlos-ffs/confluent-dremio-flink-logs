@@ -39,7 +39,6 @@ spec:
         jsonPointers:
         - /data
         - /stringData
-        - /metadata
       - group: psmdb.dremio.com
         kind: PerconaServerMongoDB
         jqPathExpressions:
