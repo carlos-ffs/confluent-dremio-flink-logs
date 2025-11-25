@@ -44,5 +44,5 @@ spec:
     name: kafka
     type: user
   role: SystemAdmin
-  clusclustersScopeByIds:
+  clustersScopeByIds:
     connectClusterId: confluent.connect
