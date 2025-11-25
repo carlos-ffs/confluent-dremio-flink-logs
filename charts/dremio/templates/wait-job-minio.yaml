@@ -9,8 +9,6 @@ metadata:
     chart: {{ template "minio.chart" .Subcharts.minio }}
     release: {{ .Release.Name }}
     heritage: {{ .Release.Service }}
-  annotations:
-    argocd.argoproj.io/sync-wave: "-1"
 spec:
   ttlSecondsAfterFinished: 10
   template:
