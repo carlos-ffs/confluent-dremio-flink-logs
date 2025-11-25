@@ -33,8 +33,7 @@ spec:
         - RespectIgnoreDifferences=true
         - ServerSideApply=true
       ignoreDifferences:
-      - group: ""
-        kind: Secret
+      - kind: Secret
         name: dremio-license
   syncPolicy:
     preserveResourcesOnDeletion: true
