@@ -1,3 +1,4 @@
+{{- if .Values.minio.enabled }}
 {{- if or .Values.minio.buckets .Values.minio.users .Values.minio.policies .Values.minio.customCommands .Values.minio.svcaccts }}
 apiVersion: batch/v1
 kind: Job
@@ -256,4 +257,5 @@ spec:
             {{- end }}
           resources: {{- toYaml .Values.minio.makeServiceAccountJob.resources | nindent 12 }}
         {{- end }}
+{{- end }}
 {{- end }}
