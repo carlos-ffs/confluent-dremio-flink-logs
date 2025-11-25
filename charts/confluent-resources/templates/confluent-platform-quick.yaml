@@ -33,8 +33,7 @@ spec:
       authentication:
         type: plain
         jaasConfig:
-          secretRef:
-            name: kafka-sasl-users
+          secretRef: kafka-sasl-users
   dependencies:
     kRaftController:
       clusterRef:
