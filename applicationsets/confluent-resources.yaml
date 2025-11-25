@@ -23,7 +23,7 @@ spec:
           ignoreMissingValueFiles: true
       destination:
         server: '{{url}}'
-        namespace: dremio
+        namespace: confluent
       syncPolicy:
         automated:
           prune: true  # Automatically delete resources that no longer exist in Git
