@@ -30,7 +30,7 @@ dremio-helm:
   imagePullSecrets:
     - dremio-pull-secret
   dremio:
-    license: ""
+    license: "<YOUR_DREMIO_LICENSE_KEY>"
   coordinator:
     extraStartParams: "-Ddebug.addDefaultUser=true -Ddremio.eula.disabled=true -Ddremio.debug.sysopt.auth.personal-access-tokens.enabled=true"
     resources:
