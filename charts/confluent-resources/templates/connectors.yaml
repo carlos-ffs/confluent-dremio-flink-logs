@@ -1,0 +1,29 @@
+---
+apiVersion: platform.confluent.io/v1beta1
+kind: Connector
+metadata:
+  name: fluent-bit-dremio-sink
+spec:
+  class: "io.tabular.iceberg.connect.IcebergSinkConnector"
+  taskMax: 2
+  connectClusterRef:
+    name: connect
+  configs:
+    topics: "fluent-bit"
+    iceberg.tables.dynamic-enabled: "true"
+    iceberg.tables.route-field: "table"
+    iceberg.tables.auto-create-enabled: "true"
+    iceberg.catalog.io-impl: "org.apache.iceberg.aws.s3.S3FileIO",
+    iceberg.catalog.uri: "http://dremio-catalog-server.dremio.svc.cluster.local:9181/api/catalog"
+    iceberg.catalog.ref: "main"
+    iceberg.catalog.authentication.type: "NONE"
+    iceberg.catalog.warehouse: "s3a://warehouse"
+    iceberg.catalog.s3.endpoint: "http://minio.dremio.svc.cluster.local:9000"
+    iceberg.catalog.io-impl: "org.apache.iceberg.aws.s3.S3FileIO"
+    iceberg.catalog.s3.path-style-access: "true"
+    iceberg.catalog.s3.access-key-id: "dremio"
+    iceberg.catalog.s3.secret-access-key: "dremio123"
+    iceberg.control.commitIntervalMs: "60000"
+    value.converter.schemas.enable: "false"
+    value.converter: "org.apache.kafka.connect.json.JsonConverter"
+    key.converter: "org.apache.kafka.connect.storage.StringConverter"

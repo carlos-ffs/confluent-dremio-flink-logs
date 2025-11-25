@@ -19,6 +19,11 @@ minio:
     purge: false
     versioning: false
     objectlocking: false
+  - name: "warehouse"
+    policy: none
+    purge: false
+    versioning: false
+    objectlocking: false
   svcaccts: 
   - accessKey: &dremioMinioUser "dremio"
     secretKey: &dremioMinioPassword "dremio123"
