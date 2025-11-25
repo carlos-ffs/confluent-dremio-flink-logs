@@ -118,7 +118,7 @@ dremio-helm:
     type: "aws"
     aws:
       bucketName: *dremioBucketName
-      path: "/dremio-dist"
+      path: "/"
       authentication: "accessKeySecret"
       credentials:
         accessKey: *dremioMinioUser
