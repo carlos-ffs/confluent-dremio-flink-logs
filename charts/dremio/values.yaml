@@ -157,7 +157,7 @@ dremio-helm:
         bucketName: *dremioBucketName
         endpoint: http://minio.dremio.svc.cluster.local:9000
         useAccessKeys: true
-        secret: catalog-minio-secret
+        secretName: catalog-minio-secret
         skipSts: true
         pathStyleAccess: true
     externalAccess:
