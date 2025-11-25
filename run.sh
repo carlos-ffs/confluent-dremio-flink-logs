@@ -12,5 +12,4 @@ kubectl apply -f repo.yaml -n argocd --kubeconfig $KUBECONFIG
 # with dremio quay credentials and license secret.
 # On the other hand, if you are using an EKS, GKE, or AKS,
 # you can leverage external-secrets to manage the pull secret seemlessly.
-kubectl apply -f dremio-secrets.yaml -n dremio --kubeconfig $KUBECONFIG --dry-run=client -o yaml \
-    | kubectl apply --kubeconfig $KUBECONFIG -f -
+kubectl apply -f dremio-secrets.yaml -n dremio --kubeconfig $KUBECONFIG
