@@ -4,7 +4,7 @@ metadata:
   name: fluent-bit
   namespace: {{ .Release.Namespace }}
 spec:
-  replicas: 1
+  replicas: 2
   partitionCount: 1
   configs:
     cleanup.policy: "delete"
