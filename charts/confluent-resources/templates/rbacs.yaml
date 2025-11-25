@@ -12,3 +12,6 @@ spec:
     patternType: LITERAL
     resourceType: Topic
   role: ResourceOwner
+  kafkaRestClassRef:
+    name: default
+    namespace: {{ .Release.Namespace }}
