@@ -8,3 +8,5 @@ spec:
   partitionCount: 1
   configs:
     cleanup.policy: "delete"
+  kafkaClusterRef:
+    name: kafka
