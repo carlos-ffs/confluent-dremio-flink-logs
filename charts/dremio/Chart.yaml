@@ -10,7 +10,7 @@ sources:
 dependencies:
   - name: dremio-helm
     condition: dremio-helm.enabled
-    version: "3.1.6"
+    version: "3.1.5"
     repository: "oci://quay.io/dremio"
   - name: minio
     condition: minio.enabled
