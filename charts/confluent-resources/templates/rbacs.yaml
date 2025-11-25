@@ -1,0 +1,16 @@
+apiVersion: platform.confluent.io/v1beta1
+kind: ConfluentRolebinding
+metadata:
+  name: fluent-bit-user-rbac
+  namespace: {{ .Release.Namespace }}
+spec:
+  principal:
+    name: fluent-bit-user
+    type: user
+  resourcePatterns:
+    name: "fluent-bit"
+    patternType: LITERAL
+    resourceType: Topic
+  role: ResourceOwner
+  kafkaRestClassRef:
+    name: default

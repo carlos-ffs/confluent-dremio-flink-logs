@@ -24,6 +24,17 @@ spec:
     application: confluentinc/cp-server:8.1.0
     init: confluentinc/confluent-init-container:3.1.0
   dataVolumeCapacity: 5Gi
+  authorization:
+    type: rbac
+    superUsers:
+      - User:kafka
+  listeners:
+    external:
+      authentication:
+        type: plain
+        jaasConfig:
+          secretRef:
+            name: kafka-sasl-users
   dependencies:
     kRaftController:
       clusterRef:
