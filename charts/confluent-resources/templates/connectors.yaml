@@ -13,7 +13,7 @@ spec:
     iceberg.tables.dynamic-enabled: "true"
     iceberg.tables.route-field: "table"
     iceberg.tables.auto-create-enabled: "true"
-    iceberg.catalog.io-impl: "org.apache.iceberg.aws.s3.S3FileIO",
+    iceberg.catalog.io-impl: "org.apache.iceberg.aws.s3.S3FileIO"
     iceberg.catalog.uri: "http://dremio-catalog-server.dremio.svc.cluster.local:9181/api/catalog"
     iceberg.catalog.ref: "main"
     iceberg.catalog.warehouse: "s3a://warehouse"
