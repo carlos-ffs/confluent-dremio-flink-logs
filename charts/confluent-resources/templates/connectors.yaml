@@ -23,7 +23,7 @@ spec:
     iceberg.catalog.s3.secret-access-key: "dremio123"
     iceberg.catalog.s3.endpoint: "http://minio.dremio.svc.cluster.local:9000"
     iceberg.catalog.credential: "dremio:dremio123"
-    iceberg.catalog.warehouse: "warehouse"
+    iceberg.catalog.warehouse: "s3a://warehouse"
     iceberg.control.commitIntervalMs: "60000"
     value.converter.schemas.enable: "false"
     value.converter: "org.apache.kafka.connect.json.JsonConverter"
