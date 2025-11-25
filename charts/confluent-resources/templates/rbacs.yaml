@@ -46,3 +46,16 @@ spec:
   role: SystemAdmin
   clustersScopeByIds:
     connectClusterId: confluent.connect
+---
+apiVersion: platform.confluent.io/v1beta1
+kind: ConfluentRolebinding
+metadata:
+  name: connect-systemadmin-rbac
+  namespace: {{ .Release.Namespace }}
+spec:
+  principal:
+    name: connect
+    type: user
+  role: SystemAdmin
+  clustersScopeByIds:
+    connectClusterId: confluent.connect
