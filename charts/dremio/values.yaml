@@ -27,8 +27,6 @@ minio:
 dremio-helm:
   enabled: true
   devMode: true # Needs to be set to true to define replicas 1 in mongodb.
-  annotations:
-    argocd.argoproj.io/sync-wave: "1"
   imagePullSecrets:
     - dremio-pull-secret
   dremio:
