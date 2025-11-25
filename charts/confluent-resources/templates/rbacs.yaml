@@ -12,7 +12,7 @@ spec:
     patternType: LITERAL
     resourceType: Topic
   role: ResourceOwner
-  clusterScopeByIds:
+  clustersScopeByIds:
     kafkaClusterId: "YWQwYmFkZDUtZmQ0Yy00MQ"
   kafkaRestClassRef:
     name: default
