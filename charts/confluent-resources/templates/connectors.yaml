@@ -24,8 +24,8 @@ spec:
     iceberg.catalog.cache-enabled: "false"
 
     # Minio credentials
-    iceberg.catalog.s3.access-key-id: "dremio"
-    iceberg.catalog.s3.secret-access-key: "dremio123"
+    iceberg.catalog.s3.access-key-id: "minio"
+    iceberg.catalog.s3.secret-access-key: "minio123"
     
     iceberg.catalog.s3.endpoint: "http://minio.dremio.svc.cluster.local:9000"
     iceberg.catalog.s3.path-style-access: "true"
