@@ -171,7 +171,7 @@ spec:
         url:
           - archivePath: https://github.com/dremio/iceberg-auth-manager/archive/refs/tags/authmgr-0.1.3.zip
             checksum: d88c8c12cfb4d88163937f68787aadb93fb3cce7deb33cdc87a233c4e8d03cec
-            name: iceberg-auth-manager
+            name: iceberg-auth-manager-authmgr-0.1.3
         confluentHub:
           - name: iceberg-kafka-connect
             owner: iceberg
