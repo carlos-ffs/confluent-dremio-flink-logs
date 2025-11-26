@@ -38,6 +38,7 @@ spec:
     iceberg.catalog.rest.auth.oauth2.token-exchange.subject-token: "Bq/hha37R++jq23yAZKQ8c+1b1ipHo06U1be3xduTq7X0Dx98dLEAPChBOpKZA=="
     iceberg.catalog.rest.auth.oauth2.token-exchange.subject-token-type: "urn:ietf:params:oauth:token-type:dremio:personal-access-token"
 
+    iceberg.coordinator.transactional.prefix: "coordinator-fluent-bit"
 
     # Connector behavior settings
     iceberg.control.commit.interval-ms: "60000"
