@@ -73,7 +73,7 @@ spec:
   - name: "fluent-bit"
     patternType: LITERAL
     resourceType: Topic
-  role: DeveloperRead
+  role: ResourceOwner
   kafkaRestClassRef:
     name: default
     namespace: {{ .Release.Namespace }}
@@ -91,7 +91,7 @@ spec:
   - name: "connect-iceberg-sink-connector"
     patternType: LITERAL
     resourceType: Group
-  role: DeveloperRead
+  role: ResourceOwner
   kafkaRestClassRef:
     name: default
     namespace: {{ .Release.Namespace }}
