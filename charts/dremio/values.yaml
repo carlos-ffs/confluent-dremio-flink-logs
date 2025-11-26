@@ -160,6 +160,7 @@ dremio-helm:
       type: "s3"
       s3:
         endpoint: http://minio.dremio.svc.cluster.local:9000
+        region: us-east-1
         useAccessKeys: true
         roleArn: arn:aws:iam::000000000000:role/catalog-access-role
         secretName: catalog-minio-secret
