@@ -17,13 +17,13 @@ spec:
     namespace: {{ .Release.Namespace }}
   configs:
     topics: "fluent-bit"
-    iceberg.tables: "fluent_bit.logs"
+    #iceberg.tables: "fluent_bit.logs"
     iceberg.tables.dynamic-enabled: "true"
     iceberg.tables.route-field: "table"
     iceberg.tables.auto-create-enabled: "true"
     iceberg.catalog.s3.access-key-id: "dremio"
     iceberg.catalog.s3.secret-access-key: "dremio123"
-    
+
     iceberg.catalog.type: "rest"
     iceberg.catalog.uri: "http://dremio-client.dremio.svc.cluster.local:8181/api/catalog"
     iceberg.catalog.warehouse: "default"
