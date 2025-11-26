@@ -21,6 +21,7 @@ spec:
     iceberg.tables.dynamic-enabled: "true"
     iceberg.tables.route-field: "table"
     iceberg.tables.auto-create-enabled: "true"
+    # Minio credentials
     iceberg.catalog.s3.access-key-id: "dremio"
     iceberg.catalog.s3.secret-access-key: "dremio123"
 
