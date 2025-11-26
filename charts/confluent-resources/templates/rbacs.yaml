@@ -89,7 +89,7 @@ spec:
     type: user
   resourcePatterns:
   - name: "connect-iceberg-sink-connector"
-    patternType: LITERAL
+    patternType: PREFIXED
     resourceType: Group
   role: ResourceOwner
   kafkaRestClassRef:
