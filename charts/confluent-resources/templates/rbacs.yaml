@@ -63,12 +63,12 @@ spec:
 apiVersion: platform.confluent.io/v1beta1
 kind: ConfluentRolebinding
 metadata:
-  name: fluent-bit-c3-rbac
+  name: fluent-bit-connect-iceberg-sink-connector-rbac
   namespace: {{ .Release.Namespace }}
 spec:
   principal:
-    name: connect
-    type: user
+    name: connect-iceberg-sink-connector
+    type: group
   resourcePatterns:
   - name: "fluent-bit"
     patternType: LITERAL
