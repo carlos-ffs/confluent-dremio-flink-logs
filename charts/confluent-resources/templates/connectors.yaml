@@ -18,11 +18,13 @@ spec:
   configs:
     topics: "fluent-bit"
     iceberg.tables: "fluent_bit.logs"
+    iceberg.tables.auto-create-enabled: "true"
     iceberg.catalog.type: "rest"
-    iceberg.catalog.uri: "http://dremio-catalog-server.dremio.svc.cluster.local:9181/api/iceberg"
+    iceberg.catalog.uri: "http://dremio-catalog-server.dremio.svc.cluster.local:9181/api/catalog"
     iceberg.catalog.warehouse: "default"
-    iceberg.catalog.rest.oauth2-server-uri: "http://dremio.dremio.svc.cluster.local:9047/oauth/token"
-    iceberg.catalog.rest.token: "Bq/hha37R++jq23yAZKQ8c+1b1ipHo06U1be3xduTq7X0Dx98dLEAPChBOpKZA=="
+    #iceberg.catalog.rest.oauth2-server-uri: "http://dremio.dremio.svc.cluster.local:9047/oauth/token"
+    iceberg.catalog.credential: "Bq/hha37R++jq23yAZKQ8c+1b1ipHo06U1be3xduTq7X0Dx98dLEAPChBOpKZA=="
+    #iceberg.catalog.rest.token: "Bq/hha37R++jq23yAZKQ8c+1b1ipHo06U1be3xduTq7X0Dx98dLEAPChBOpKZA=="
     iceberg.catalog.rest.header.X-Iceberg-Access-Delegation: "vended-credentials"
     # Connector behavior settings
     iceberg.control.commit.interval-ms: "60000"
