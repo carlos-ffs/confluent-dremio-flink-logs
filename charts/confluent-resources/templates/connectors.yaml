@@ -18,6 +18,7 @@ spec:
   configs:
     topics: "fluent-bit"
     #iceberg.tables: "fluent_bit.logs"
+    iceberg.tables.dynamic-enabled: "true"
     iceberg.tables.route-field: "table"
     iceberg.tables.auto-create-enabled: "true"
     iceberg.catalog.cache-enabled: "false"
