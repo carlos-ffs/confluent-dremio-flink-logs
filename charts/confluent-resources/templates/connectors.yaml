@@ -16,18 +16,9 @@ spec:
     name: connect
     namespace: {{ .Release.Namespace }}
   configs:
-    connection.user: "kafka"
-    connection.password: "kafka-secret"
     topics: "fluent-bit"
-    iceberg.tables.dynamic-enabled: "true"
-    iceberg.tables.route-field: "table"
-    iceberg.tables.auto-create-enabled: "true"
     iceberg.catalog.uri: "http://dremio-catalog-server.dremio.svc.cluster.local:9181/api/iceberg"
-    iceberg.catalog.warehouse: "default"
-    iceberg.catalog.ref: "main"
+    iceberg.catalog.rest.oauth2-server-uri: "http://dremio.dremio.svc.cluster.local:9047/oauth/token"
+    iceberg.catalog.warehouse: "dremio-catalog"
     iceberg.catalog.type: "rest"
     iceberg.catalog.credential: "dremio:dremio123"
-    iceberg.control.commitIntervalMs: "60000"
-    value.converter.schemas.enable: "false"
-    value.converter: "org.apache.kafka.connect.json.JsonConverter"
-    key.converter: "org.apache.kafka.connect.storage.StringConverter"
