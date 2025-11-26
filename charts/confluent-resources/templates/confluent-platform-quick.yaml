@@ -170,7 +170,7 @@ spec:
         url:
           - archivePath: https://github.com/carlos-ffs/confluent-dremio-flink-logs/releases/download/0.0.1/dremio-iceberg-kafka-connect-1.9.2.zip
             checksum: "1fde8a9fccbd592b8168d36bc5b350f69d572f99547d2f21b51b49b73d613db4fe4bc33ef5549239683a243ae04b780bdbf6d57f58ae48f372157e2e14992674"
-            name: dremio-iceberg-kafka-connect
+            name: dremio-iceberg-kafka-connect-1.9.2
         # confluentHub:
         #   - name: iceberg-kafka-connect
         #     owner: iceberg
