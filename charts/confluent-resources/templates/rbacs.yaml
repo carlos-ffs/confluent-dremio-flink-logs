@@ -67,7 +67,7 @@ metadata:
   namespace: {{ .Release.Namespace }}
 spec:
   principal:
-    name: c3
+    name: connect
     type: user
   resourcePatterns:
   - name: "fluent-bit"
