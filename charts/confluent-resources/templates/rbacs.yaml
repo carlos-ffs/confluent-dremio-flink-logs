@@ -108,7 +108,7 @@ spec:
   resourcePatterns:
   - name: "coordinator-fluent-bit"
     patternType: PREFIXED
-    resourceType: TransactionalID
+    resourceType: TransactionalId
   role: ResourceOwner
   kafkaRestClassRef:
     name: default
