@@ -168,13 +168,13 @@ spec:
     onDemand:
       plugins:
         url:
-          - archivePath: https://github.com/dremio/iceberg-auth-manager/releases/download/authmgr-0.1.3/authmgr-oauth2-standalone-0.1.3.jar
-            checksum: f2d82ec0ce8b41ad03c7f0201365b093c2c0bea25e76b97a98b6b8500f5b6687d5915da3257f2dedaf7c602e52ea40437a76c7d0daa37755bed40c7e5c4077f1 #cf83e1357eefb8bdf1542850d66d8007d620e4050b5715dc83f4a921d36ce9ce47d0d13c5d85f2b0ff8318d2877eec2f63b931bd47417a81a538327af927da3e
-            name: iceberg-auth-manager
-        confluentHub:
-          - name: iceberg-kafka-connect
-            owner: iceberg
-            version: 1.9.2
+          - archivePath: https://github.com/carlos-ffs/confluent-dremio-flink-logs/archive/refs/tags/0.0.1.zip
+            checksum: 1fde8a9fccbd592b8168d36bc5b350f69d572f99547d2f21b51b49b73d613db4fe4bc33ef5549239683a243ae04b780bdbf6d57f58ae48f372157e2e14992674 #cf83e1357eefb8bdf1542850d66d8007d620e4050b5715dc83f4a921d36ce9ce47d0d13c5d85f2b0ff8318d2877eec2f63b931bd47417a81a538327af927da3e
+            name: dremio-iceberg-kafka-connect
+        # confluentHub:
+        #   - name: iceberg-kafka-connect
+        #     owner: iceberg
+        #     version: 1.9.2
   dependencies:
     kafka:
       bootstrapEndpoint: kafka.confluent.svc.cluster.local:9071
