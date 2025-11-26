@@ -51,3 +51,4 @@ spec:
     iceberg.kafka.security.protocol: "SASL_SSL"
     iceberg.kafka.sasl.mechanism: "PLAIN"
     iceberg.kafka.sasl.jaas.config: "org.apache.kafka.common.security.plain.PlainLoginModule required username=\"fluent-bit-user\" password=\"fluent-bit-producer-secret\";"
+    iceberg.kafka.ssl.endpoint.identification.algorithm: ""
