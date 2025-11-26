@@ -17,6 +17,7 @@ spec:
     namespace: {{ .Release.Namespace }}
   configs:
     topics: "fluent-bit"
+    iceberg.tables: fluent_bit.logs
     iceberg.catalog.uri: "http://dremio-catalog-server.dremio.svc.cluster.local:9181/api/iceberg"
     iceberg.catalog.rest.oauth2-server-uri: "http://dremio.dremio.svc.cluster.local:9047/oauth/token"
     iceberg.catalog.warehouse: "dremio-catalog"
