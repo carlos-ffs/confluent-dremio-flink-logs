@@ -13,3 +13,19 @@ spec:
   kafkaRestClassRef:
     name: default
     namespace: {{ .Release.Namespace }}
+---
+apiVersion: platform.confluent.io/v1beta1
+kind: KafkaTopic
+metadata:
+  name: control-iceberg
+  namespace: {{ .Release.Namespace }}
+spec:
+  replicas: 1
+  partitionCount: 1
+  configs:
+    cleanup.policy: "delete"
+    retention.bytes: "524288000" # 500MB
+    retention.ms: "3600000" # 1 hour
+  kafkaRestClassRef:
+    name: default
+    namespace: {{ .Release.Namespace }}
