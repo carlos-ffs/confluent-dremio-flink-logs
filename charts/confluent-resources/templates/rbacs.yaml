@@ -113,3 +113,21 @@ spec:
   kafkaRestClassRef:
     name: default
     namespace: {{ .Release.Namespace }}
+---
+apiVersion: platform.confluent.io/v1beta1
+kind: ConfluentRolebinding
+metadata:
+  name: connect-control-iceberg-topic-rbac
+  namespace: {{ .Release.Namespace }}
+spec:
+  principal:
+    name: connect
+    type: user
+  resourcePatterns:
+  - name: "control-iceberg"
+    patternType: LITERAL
+    resourceType: Topic
+  role: ResourceOwner
+  kafkaRestClassRef:
+    name: default
+    namespace: {{ .Release.Namespace }}
