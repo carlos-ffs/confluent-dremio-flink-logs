@@ -21,7 +21,7 @@ spec:
     iceberg.catalog.type: "rest"
     iceberg.catalog.uri: "http://dremio-catalog-server.dremio.svc.cluster.local:9181/api/iceberg"
     iceberg.catalog.warehouse: "dremio-catalog"
-    iceberg.catalog.rest.oauth2-server-uri: "http://dremio.dremio.svc.cluster.local:9181/oauth/token"
+    iceberg.catalog.rest.oauth2-server-uri: "http://dremio.dremio.svc.cluster.local:9047/oauth/token"
     iceberg.catalog.rest.token: "Bq/hha37R++jq23yAZKQ8c+1b1ipHo06U1be3xduTq7X0Dx98dLEAPChBOpKZA=="
     # Connector behavior settings
     iceberg.control.commit.interval-ms: "60000"
