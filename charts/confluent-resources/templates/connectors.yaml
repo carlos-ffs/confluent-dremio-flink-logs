@@ -8,6 +8,10 @@ spec:
   taskMax: 2
   connectRest:
     endpoint: https://connect.confluent.svc.cluster.local:8083
+    authentication:
+      type: bearer
+      bearer:
+        secretRef: mds-client
   connectClusterRef:
     name: connect
     namespace: {{ .Release.Namespace }}
