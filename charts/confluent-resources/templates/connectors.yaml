@@ -23,6 +23,7 @@ spec:
     iceberg.catalog.warehouse: "default"
     iceberg.catalog.rest.oauth2-server-uri: "http://dremio.dremio.svc.cluster.local:9047/oauth/token"
     iceberg.catalog.rest.token: "Bq/hha37R++jq23yAZKQ8c+1b1ipHo06U1be3xduTq7X0Dx98dLEAPChBOpKZA=="
+    iceberg.catalog.rest.header.X-Iceberg-Access-Delegation: "vended-credentials"
     # Connector behavior settings
     iceberg.control.commit.interval-ms: "60000"
     iceberg.control.commit.timeout-ms: "10000"
