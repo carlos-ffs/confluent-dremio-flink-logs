@@ -27,9 +27,14 @@ spec:
     iceberg.catalog.s3.access-key-id: "dremio"
     iceberg.catalog.s3.secret-access-key: "dremio123"
 
+    iceberg.catalog.io-impl: "org.apache.iceberg.aws.s3.S3FileIO"
+    iceberg.catalog.s3.path-style-access: "true"
+    iceberg.catalog.s3.endpoint: "http://minio.dremio.svc.cluster.local:9000"
+    iceberg.catalog.warehouse: "s3a://warehouse"
+
     iceberg.catalog.type: "rest"
     iceberg.catalog.uri: "http://dremio-client.dremio.svc.cluster.local:8181/api/catalog"
-    iceberg.catalog.warehouse: "default"
+    #iceberg.catalog.warehouse: "default"
     iceberg.catalog.rest.auth.type: "com.dremio.iceberg.authmgr.oauth2.OAuth2Manager"
     iceberg.catalog.rest.auth.oauth2.token-endpoint: "http://dremio-client.dremio.svc.cluster.local:9047/oauth/token"
     iceberg.catalog.rest.auth.oauth2.grant-type: "urn:ietf:params:oauth:grant-type:token-exchange"
