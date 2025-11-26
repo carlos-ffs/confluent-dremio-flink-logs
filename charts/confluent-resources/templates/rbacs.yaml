@@ -63,16 +63,34 @@ spec:
 apiVersion: platform.confluent.io/v1beta1
 kind: ConfluentRolebinding
 metadata:
-  name: fluent-bit-connect-iceberg-sink-connector-rbac
+  name: connect-fluent-bit-topic-rbac
   namespace: {{ .Release.Namespace }}
 spec:
   principal:
-    name: connect-iceberg-sink-connector
-    type: group
+    name: connect
+    type: user
   resourcePatterns:
   - name: "fluent-bit"
     patternType: LITERAL
     resourceType: Topic
+  role: DeveloperRead
+  kafkaRestClassRef:
+    name: default
+    namespace: {{ .Release.Namespace }}
+---
+apiVersion: platform.confluent.io/v1beta1
+kind: ConfluentRolebinding
+metadata:
+  name: connect-consumer-group-rbac
+  namespace: {{ .Release.Namespace }}
+spec:
+  principal:
+    name: connect
+    type: user
+  resourcePatterns:
+  - name: "connect-iceberg-sink-connector"
+    patternType: LITERAL
+    resourceType: Group
   role: DeveloperRead
   kafkaRestClassRef:
     name: default
