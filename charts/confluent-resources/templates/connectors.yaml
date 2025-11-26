@@ -31,6 +31,9 @@ spec:
     # iceberg.catalog.io-impl: "org.apache.iceberg.aws.s3.S3FileIO"
     # iceberg.catalog.s3.endpoint: "http://minio.dremio.svc.cluster.local:9000"
     # iceberg.catalog.s3.path-style-access: "true"
+    # # AWS SDK configuration for MinIO
+    iceberg.catalog.client.region: "us-east-1"
+    iceberg.catalog.s3.region: "us-east-1"
     
     iceberg.catalog.type: "rest"
     iceberg.catalog.uri: "http://dremio-client.dremio.svc.cluster.local:8181/api/catalog"
