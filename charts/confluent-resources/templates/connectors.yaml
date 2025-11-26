@@ -20,7 +20,7 @@ spec:
     iceberg.tables: "fluent_bit.logs"
     iceberg.catalog.type: "rest"
     iceberg.catalog.uri: "http://dremio-catalog-server.dremio.svc.cluster.local:9181/api/iceberg"
-    iceberg.catalog.warehouse: "dremio-catalog"
+    iceberg.catalog.warehouse: "default"
     # Use basic authentication instead of OAuth2
     iceberg.catalog.rest.auth.type: "basic"
     
