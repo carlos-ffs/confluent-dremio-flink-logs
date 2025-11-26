@@ -6,6 +6,10 @@ spec:
   class: "io.tabular.iceberg.connect.IcebergSinkConnector"
   name: "iceberg-sink-connector"
   taskMax: 2
+  connectRest:
+    url: https://connect.confluent.svc.cluster.local:8083
+    tls:
+      enabled: true
   connectClusterRef:
     name: connect
     namespace: {{ .Release.Namespace }}
