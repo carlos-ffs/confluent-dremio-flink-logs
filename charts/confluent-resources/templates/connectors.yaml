@@ -10,6 +10,8 @@ spec:
     name: connect
     namespace: {{ .Release.Namespace }}
   configs:
+    connection.user: "kafka"
+    connection.password: "kafka-secret"
     topics: "fluent-bit"
     iceberg.tables.dynamic-enabled: "true"
     iceberg.tables.route-field: "table"
