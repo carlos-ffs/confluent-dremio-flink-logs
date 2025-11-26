@@ -170,7 +170,7 @@ spec:
         url:
           - archivePath: https://github.com/carlos-ffs/confluent-dremio-flink-logs/archive/refs/tags/0.0.1.zip
             checksum: "be797f60f5f26da0baa3d03d46924bf3205879ff528125749e28d975c834d1f545e1ae16cf5e806b7c9ca36a9b3c2b678eb726028e12d0fedef8fac2f255cd8a"
-            name: dremio-iceberg-kafka-connect
+            name: confluent-dremio-flink-logs-0.0.1
         # confluentHub:
         #   - name: iceberg-kafka-connect
         #     owner: iceberg
