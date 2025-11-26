@@ -73,7 +73,7 @@ spec:
   - name: "fluent-bit"
     patternType: LITERAL
     resourceType: Topic
-  role: DeveloperWrite
+  role: DeveloperManage
   kafkaRestClassRef:
     name: default
     namespace: {{ .Release.Namespace }}
