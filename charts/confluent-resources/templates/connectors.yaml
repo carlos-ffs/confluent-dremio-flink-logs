@@ -20,13 +20,12 @@ spec:
     iceberg.tables: "fluent_bit.logs"
     iceberg.catalog.type: "rest"
     iceberg.catalog.uri: "http://dremio-catalog-server.dremio.svc.cluster.local:9181/api/iceberg"
-    iceberg.catalog.warehouse: "dremio-catalog"
+    iceberg.catalog.warehouse: "default"
     iceberg.catalog.rest.oauth2-server-uri: "http://dremio.dremio.svc.cluster.local:9047/oauth/token"
     iceberg.catalog.rest.token: "Bq/hha37R++jq23yAZKQ8c+1b1ipHo06U1be3xduTq7X0Dx98dLEAPChBOpKZA=="
     # Connector behavior settings
     iceberg.control.commit.interval-ms: "60000"
     iceberg.control.commit.timeout-ms: "10000"
-    # Data format settings
-    value.converter: "org.apache.kafka.connect.json.JsonConverter"
-    value.converter.schemas.enable: "false"
-    key.converter: "org.apache.kafka.connect.storage.StringConverter"
+    # value.converter: "org.apache.kafka.connect.json.JsonConverter"
+    # value.converter.schemas.enable: "false"
+    # key.converter: "org.apache.kafka.connect.storage.StringConverter"
