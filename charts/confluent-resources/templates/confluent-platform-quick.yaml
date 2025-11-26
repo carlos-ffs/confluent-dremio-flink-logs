@@ -168,9 +168,9 @@ spec:
     onDemand:
       plugins:
         url:
-          - archivePath: https://github.com/carlos-ffs/confluent-dremio-flink-logs/releases/download/0.0.2/iceberg-iceberg-kafka-connect-1.9.2-1.zip
-            checksum: 589a727d074f241e4410447f99c9085f26a16534894a1d5a58f13d252089369324411cbd97d5cf8a9aa9533635c6b051a19163241b31b548199d406baab31da8
-            name: dremio-iceberg-connector
+          - archivePath: https://github.com/carlos-ffs/confluent-dremio-flink-logs/archive/refs/tags/0.0.2.zip
+            checksum: 4a13ed931c56b1e8aa7e651320ed7eac5dcd6cd3c15a2c6d1b20706c9c91c92ecade4f20e4d68763be58dcaad49d3d7d29a3fc27950d4dd6ebf6ec506920c907
+            name: confluent-dremio-flink-logs-0.0.2
         # confluentHub:
         #   - name: iceberg-kafka-connect
         #     owner: iceberg
