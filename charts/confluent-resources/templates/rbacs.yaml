@@ -59,3 +59,21 @@ spec:
   role: SystemAdmin
   clustersScopeByIds:
     connectClusterId: confluent.connect
+---
+apiVersion: platform.confluent.io/v1beta1
+kind: ConfluentRolebinding
+metadata:
+  name: fluent-bit-c3-rbac
+  namespace: {{ .Release.Namespace }}
+spec:
+  principal:
+    name: c3
+    type: user
+  resourcePatterns:
+  - name: "fluent-bit"
+    patternType: LITERAL
+    resourceType: Topic
+  role: DeveloperWrite
+  kafkaRestClassRef:
+    name: default
+    namespace: {{ .Release.Namespace }}
