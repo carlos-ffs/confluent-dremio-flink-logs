@@ -20,7 +20,7 @@ spec:
     iceberg.tables: "fluent_bit.logs"
     iceberg.tables.auto-create-enabled: "true"
     iceberg.catalog.type: "rest"
-    iceberg.catalog.rest.auth.type: "com.dremio.iceberg.authmgr.oauth2.OAuth2Manager"
+    #iceberg.catalog.rest.auth.type: "com.dremio.iceberg.authmgr.oauth2.OAuth2Manager"
     iceberg.catalog.uri: "http://dremio-client.dremio.svc.cluster.local:8181/api/catalog"
     iceberg.catalog.warehouse: "default"
     iceberg.catalog.rest.oauth2-server-uri: "http://dremio.dremio.svc.cluster.local:9047/oauth/token"
