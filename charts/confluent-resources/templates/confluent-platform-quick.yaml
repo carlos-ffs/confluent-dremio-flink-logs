@@ -169,7 +169,7 @@ spec:
       plugins:
         url:
           - archivePath: https://github.com/carlos-ffs/confluent-dremio-flink-logs/archive/refs/tags/0.0.1.zip
-            checksum: be797f60f5f26da0baa3d03d46924bf3205879ff528125749e28d975c834d1f545e1ae16cf5e806b7c9ca36a9b3c2b678eb726028e12d0fedef8fac2f255cd8a #cf83e1357eefb8bdf1542850d66d8007d620e4050b5715dc83f4a921d36ce9ce47d0d13c5d85f2b0ff8318d2877eec2f63b931bd47417a81a538327af927da3e
+            checksum: "be797f60f5f26da0baa3d03d46924bf3205879ff528125749e28d975c834d1f545e1ae16cf5e806b7c9ca36a9b3c2b678eb726028e12d0fedef8fac2f255cd8a"
             name: dremio-iceberg-kafka-connect
         # confluentHub:
         #   - name: iceberg-kafka-connect
