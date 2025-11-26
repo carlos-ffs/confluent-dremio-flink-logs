@@ -17,22 +17,23 @@ spec:
     namespace: {{ .Release.Namespace }}
   configs:
     topics: "fluent-bit"
-    iceberg.tables: "fluent_bit.logs"
+    #iceberg.tables: "fluent_bit.logs"
+    iceberg.tables.dynamic-enabled: "true"
     iceberg.tables.auto-create-enabled: "true"
     iceberg.tables.schema-force-optional: "true"
     iceberg.catalog.cache-enabled: "false"
 
     # Minio credentials
-    iceberg.catalog.s3.access-key-id: "minio"
-    iceberg.catalog.s3.secret-access-key: "minio123"
+    iceberg.catalog.s3.access-key-id: "dremio"
+    iceberg.catalog.s3.secret-access-key: "dremio123"
 
-    # S3/MinIO configuration
-    iceberg.catalog.io-impl: "org.apache.iceberg.aws.s3.S3FileIO"
-    iceberg.catalog.s3.endpoint: "http://minio.dremio.svc.cluster.local:9000"
-    iceberg.catalog.s3.path-style-access: "true"
-    # AWS SDK configuration for MinIO
-    iceberg.catalog.client.region: "us-east-1"
-    iceberg.catalog.s3.region: "us-east-1"
+    # # S3/MinIO configuration
+    # iceberg.catalog.io-impl: "org.apache.iceberg.aws.s3.S3FileIO"
+    # iceberg.catalog.s3.endpoint: "http://minio.dremio.svc.cluster.local:9000"
+    # iceberg.catalog.s3.path-style-access: "true"
+    # # AWS SDK configuration for MinIO
+    # iceberg.catalog.client.region: "us-east-1"
+    # iceberg.catalog.s3.region: "us-east-1"
     
     iceberg.catalog.type: "rest"
     iceberg.catalog.uri: "http://dremio-client.dremio.svc.cluster.local:8181/api/catalog"
