@@ -17,9 +17,9 @@ spec:
     namespace: {{ .Release.Namespace }}
   configs:
     topics: "fluent-bit"
-    #iceberg.tables: "fluent_bit_logs"
-    iceberg.tables.dynamic-enabled: "true"
-    iceberg.tables.route-field: "table"
+    iceberg.tables: "fluent_bit.logs"
+    iceberg.tables.dynamic-enabled: "false"
+    #iceberg.tables.route-field: "table"
     iceberg.tables.auto-create-enabled: "true"
     iceberg.catalog.cache-enabled: "false"
 
@@ -31,7 +31,6 @@ spec:
     iceberg.catalog.client.region: "us-east-1"
     iceberg.catalog.s3.endpoint: "http://minio.dremio.svc.cluster.local:9000"
     iceberg.catalog.s3.path-style-access: "true"
-    iceberg.catalog.s3.connection.ssl.enabled: "false"
     
     iceberg.catalog.type: "rest"
     iceberg.catalog.uri: "http://dremio-client.dremio.svc.cluster.local:8181/api/catalog"
