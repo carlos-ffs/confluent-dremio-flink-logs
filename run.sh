@@ -19,4 +19,4 @@ openssl req -new -key ./charts/confluent-resources/tls/ca-key.pem -x509 \
 # with dremio quay credentials and license secret.
 # On the other hand, if you are using an EKS, GKE, or AKS,
 # you can leverage external-secrets to manage the pull secret seemlessly.
-kubectl apply -f dremio-secrets.yaml -n dremio --server-side --kubeconfig $KUBECONFIG
+kubectl apply -f dremio-secrets.yaml -n dremio --server-side --force-conflicts --kubeconfig $KUBECONFIG

@@ -61,5 +61,4 @@ spec:
       - group: apps
         kind: StatefulSet
         jqPathExpressions:
-          - .spec.volumeClaimTemplates[].metadata
-          - .spec.volumeClaimTemplates[].status
+          - .spec.volumeClaimTemplates[]

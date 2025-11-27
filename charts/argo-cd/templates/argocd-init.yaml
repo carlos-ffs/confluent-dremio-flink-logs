@@ -3,6 +3,8 @@ kind: AppProject
 metadata:
   name: local-project
   namespace: argocd
+  annotations:
+    "helm.sh/hook": post-install,post-upgrade
 spec:
   sourceRepos:
   - 'https://github.com/carlos-ffs/confluent-dremio-flink-logs.git'
@@ -40,6 +42,8 @@ kind: ApplicationSet
 metadata:
   name: root-appset
   namespace: argocd
+  annotations:
+    "helm.sh/hook": post-install,post-upgrade
 spec:
   goTemplate: true
   goTemplateOptions: ["missingkey=error"]
