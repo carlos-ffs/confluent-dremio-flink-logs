@@ -42,14 +42,13 @@ DIST_DIR="kafka-connect/kafka-connect-runtime/build/distributions"
 ICEBERG_ZIP="$(ls -1 "${DIST_DIR}"/iceberg-kafka-connect-runtime-*.zip | head -n1)"
 echo "Found Iceberg Kafka Connect ZIP: ${ICEBERG_ZIP}"
 
-# ===== 2) Fetch Dremio AuthManager runtime bundle from Maven =====
+# Fetch Dremio AuthManager runtime bundle from Maven
 mvn -q dependency:get -Dartifact=com.dremio.iceberg.authmgr:authmgr-oauth2-runtime:${AUTHMGR_VERSION}
 AUTHMGR_JAR="${HOME}/.m2/repository/com/dremio/iceberg/authmgr/authmgr-oauth2-runtime/${AUTHMGR_VERSION}/authmgr-oauth2-runtime-${AUTHMGR_VERSION}.jar"
 test -f "$AUTHMGR_JAR" || { echo "AuthManager jar not found at $AUTHMGR_JAR"; exit 1; }
 echo "Fetched AuthManager jar: ${AUTHMGR_JAR}"
 
-# ===== 3) Unzip, add AuthManager jar into libs/, and re-zip =====
-# Make a temp folder and extract the Iceberg plugin
+# Unzip, add AuthManager jar into libs/, and re-zip
 TMP_DIR="${WORKDIR}/tmp-iceberg-conn"
 rm -rf "$TMP_DIR"
 mkdir -p "$TMP_DIR"

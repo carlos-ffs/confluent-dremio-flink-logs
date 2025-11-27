@@ -17,6 +17,7 @@ spec:
 apiVersion: platform.confluent.io/v1beta1
 kind: KafkaTopic
 metadata:
+  # https://iceberg.apache.org/docs/nightly/kafka-connect/#control-topic
   name: control-iceberg
   namespace: {{ .Release.Namespace }}
 spec:
