@@ -18,6 +18,7 @@ spec:
         targetRevision: HEAD
         path: charts/dremio
         helm:
+          releaseName: dremio
           valueFiles: 
           - values.yaml
       destination:
@@ -39,7 +40,26 @@ spec:
         jsonPointers:
         - /data
         - /stringData
+      - kind: Secret
+        name: dremio-mongodb-app-users
+        namespace: dremio
+        jsonPointers:
+        - /data
+        - /stringData
       - group: psmdb.dremio.com
         kind: PerconaServerMongoDB
         jqPathExpressions:
         - .spec.replsets[].sidecars[]
+      - group: batch
+        kind: Job
+        name: minio-wait-for-job
+        namespace: dremio
+      - group: batch
+        kind: Job
+        name: dremio-cluster-id
+        namespace: dremio
+      - group: apps
+        kind: StatefulSet
+        jqPathExpressions:
+          - .spec.volumeClaimTemplates[].metadata
+          - .spec.volumeClaimTemplates[].status

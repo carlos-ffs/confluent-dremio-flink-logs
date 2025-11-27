@@ -45,6 +45,9 @@ dremio-helm:
       limits:
         memory: "4Gi"
     volumeSize: 5Gi
+    log:
+      volume:
+        size: 2Gi
 
   # For classic engine. Use elastic engine instead.
   # https://docs.dremio.com/current/deploy-dremio/configuring-kubernetes/#configuration-of-classic-engines
