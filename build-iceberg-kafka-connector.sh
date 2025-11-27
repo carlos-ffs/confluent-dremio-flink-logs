@@ -5,6 +5,10 @@ set -euo pipefail
 # On Debian/Ubuntu: sudo apt-get install -y git unzip zip maven
 # Ensure JAVA_HOME points to JDK 17+.
 
+# Version configuration
+# https://github.com/dremio/iceberg-auth-manager/releases
+AUTHMGR_VERSION="0.1.3"
+
 # Set JAVA_HOME to JDK 21 (required by Iceberg build - must be 11, 17, or 21)
 if [[ "$OSTYPE" == "darwin"* ]]; then
   # macOS
@@ -17,7 +21,7 @@ echo "Using Java: $JAVA_HOME"
 java -version
 
 # ===== 1) Get Apache Iceberg and build the Kafka Connect runtime ZIP =====
-WORKDIR="${PWD}/iceberg-build"
+WORKDIR="${PWD}/iceberg-kafka-connector-build"
 mkdir -p "$WORKDIR"
 cd "$WORKDIR"
 
@@ -31,16 +35,16 @@ cd iceberg
 # git checkout apache-iceberg-1.5.0
 
 # Build only the Kafka Connect runtime distribution (skip tests to go fast)
-./gradlew -x test -x integrationTest clean build
+./gradlew :iceberg-kafka-connect:iceberg-kafka-connect-runtime:clean :iceberg-kafka-connect:iceberg-kafka-connect-runtime:build -x test -x integrationTest
 
 # Locate the produced ZIP (there may be variants; we take the first)
 DIST_DIR="kafka-connect/kafka-connect-runtime/build/distributions"
 ICEBERG_ZIP="$(ls -1 "${DIST_DIR}"/iceberg-kafka-connect-runtime-*.zip | head -n1)"
 echo "Found Iceberg Kafka Connect ZIP: ${ICEBERG_ZIP}"
 
-# ===== 2) Fetch Dremio AuthManager 0.1.3 runtime bundle from Maven =====
-mvn -q dependency:get -Dartifact=com.dremio.iceberg.authmgr:authmgr-oauth2-runtime:0.1.3
-AUTHMGR_JAR="${HOME}/.m2/repository/com/dremio/iceberg/authmgr/authmgr-oauth2-runtime/0.1.3/authmgr-oauth2-runtime-0.1.3.jar"
+# ===== 2) Fetch Dremio AuthManager runtime bundle from Maven =====
+mvn -q dependency:get -Dartifact=com.dremio.iceberg.authmgr:authmgr-oauth2-runtime:${AUTHMGR_VERSION}
+AUTHMGR_JAR="${HOME}/.m2/repository/com/dremio/iceberg/authmgr/authmgr-oauth2-runtime/${AUTHMGR_VERSION}/authmgr-oauth2-runtime-${AUTHMGR_VERSION}.jar"
 test -f "$AUTHMGR_JAR" || { echo "AuthManager jar not found at $AUTHMGR_JAR"; exit 1; }
 echo "Fetched AuthManager jar: ${AUTHMGR_JAR}"
 
@@ -60,7 +64,7 @@ test -d "$LIBS_DIR" || { echo "lib/ directory not found under ${EXTRACTED_DIR}";
 cp "$AUTHMGR_JAR" "$LIBS_DIR"
 
 # Make a final bundled zip
-FINAL_ZIP="${WORKDIR}/iceberg-kafka-connect-with-authmgr-0.1.3.zip"
+FINAL_ZIP="${WORKDIR}/iceberg-kafka-connect-with-authmgr-${AUTHMGR_VERSION}.zip"
 rm -f "$FINAL_ZIP"
 (
   cd "$TMP_DIR"
@@ -71,7 +75,9 @@ echo "Created bundled plugin: ${FINAL_ZIP}"
 echo "sha512sum checksum: $(sha512sum "$FINAL_ZIP")"
 
 # Verify jar presence inside the new ZIP
-unzip -l "$FINAL_ZIP" | grep -E 'authmgr-oauth2-runtime-0\.1\.3\.jar' || {
+unzip -l "$FINAL_ZIP" | grep -E "authmgr-oauth2-runtime-${AUTHMGR_VERSION}\.jar" || {
   echo "Warning: AuthManager jar not found in listing. Inspect ${FINAL_ZIP} manually."
 }
 
+rm -rf "$TMP_DIR"
+rm -rf "$WORKDIR/iceberg"
