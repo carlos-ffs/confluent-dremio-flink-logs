@@ -74,12 +74,13 @@ spec:
               ENGINE_ID=$(echo "$ENGINE_RESPONSE" | jq -r '.id')
               echo "Engine ID: $ENGINE_ID"
 
-              START_ENGINE_RESPONSE=$(curl -s -X PUT "$DREMIO_HOST/api/v3/engines/$ENGINE_ID/start" \
-                -H "Content-Type: application/json" \
-                -H "Authorization: _dremio$TOKEN")
-              echo "Engine start response: $START_ENGINE_RESPONSE"
-              sleep 3
-
+              if [ "$ENGINE_ID" != "null" ]; then
+                START_ENGINE_RESPONSE=$(curl -s -X PUT "$DREMIO_HOST/api/v3/engines/$ENGINE_ID/start" \
+                  -H "Content-Type: application/json" \
+                  -H "Authorization: _dremio$TOKEN")
+                echo "Engine start response: $START_ENGINE_RESPONSE"
+                sleep 3
+              fi
 
               echo "Retrieving WLM rules..."
               WLM_RULES=$(curl -s -X GET "$DREMIO_HOST/api/v3/wlm/rule" \
@@ -97,26 +98,28 @@ spec:
               QUEUE_ID=$(echo "$QUEUE_RESPONSE" | jq -r '.id')
               echo "Queue ID: $QUEUE_ID"
 
-              NEW_RULE=$(cat <<EOF
-              {
-                "acceptId": "$QUEUE_ID",
-                "action": "PLACE",
-                "conditions": "query_type() = 'Autonomous Reflections'",
-                "name": "Autonomous Reflections",
-                "rejectMessage": ""
-              }
-              EOF
-              )
+              if [ "$QUEUE_ID" != "null" ]; then
+                NEW_RULE=$(cat <<EOF
+                {
+                  "acceptId": "$QUEUE_ID",
+                  "action": "PLACE",
+                  "conditions": "query_type() = 'Autonomous Reflections'",
+                  "name": "Autonomous Reflections",
+                  "rejectMessage": ""
+                }
+                EOF
+                )
 
-              # Add the new rule to the beginning of the rules array
-              UPDATED_WLM_RULES=$(echo "$WLM_RULES" | jq --argjson newRule "$NEW_RULE" '.rules = [$newRule] + .rules')
+                # Add the new rule to the beginning of the rules array
+                UPDATED_WLM_RULES=$(echo "$WLM_RULES" | jq --argjson newRule "$NEW_RULE" '.rules = [$newRule] + .rules')
 
-              echo "Updating WLM rules..."
-              WLM_UPDATE_RESPONSE=$(curl -s -X PUT "$DREMIO_HOST/api/v3/wlm/rule" \
-                -H "Content-Type: application/json" \
-                -H "Authorization: _dremio$TOKEN" \
-                -d "$UPDATED_WLM_RULES")
-              echo "WLM rules update response: $WLM_UPDATE_RESPONSE"
+                echo "Updating WLM rules..."
+                WLM_UPDATE_RESPONSE=$(curl -s -X PUT "$DREMIO_HOST/api/v3/wlm/rule" \
+                  -H "Content-Type: application/json" \
+                  -H "Authorization: _dremio$TOKEN" \
+                  -d "$UPDATED_WLM_RULES")
+                echo "WLM rules update response: $WLM_UPDATE_RESPONSE"
+              fi
 
               echo "Enabling autonomous reflections..."
               REFLECTION_RESPONSE=$(curl -s -X PUT "$DREMIO_HOST/apiv2/settings/reflection.recommender.autonomous_mode.enabled" \
