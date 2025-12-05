@@ -157,7 +157,32 @@ graph TB
 
 Fork this repository to your own GitHub account so you can make changes and have ArgoCD sync from your fork.
 
-### Step 2: Configure Kubernetes Context
+### Step 2: Configure Private Repository Access (If Applicable)
+
+If your forked repository is **private**, you need to configure ArgoCD with GitHub credentials:
+
+1. **Create a GitHub Personal Access Token (PAT)**:
+   - Go to GitHub Settings → Developer settings → Personal access tokens → Tokens (classic)
+   - Generate a new token with `repo` scope (full control of private repositories)
+   - Copy the token value
+
+2. **Update `init-resources/argocd-git-repository.yaml`**:
+   ```yaml
+   apiVersion: v1
+   kind: Secret
+   metadata:
+     name: private-repo
+     namespace: argocd
+     labels:
+       argocd.argoproj.io/secret-type: repository
+   stringData:
+     type: git
+     url: https://github.com/<YOUR_USERNAME>/<YOUR_REPO_NAME>
+     username: <YOUR_GITHUB_USERNAME>
+     password: <YOUR_GITHUB_PAT>
+   ```
+
+### Step 3: Configure Kubernetes Context
 
 Ensure your `kubectl` is configured to point to your Kubernetes cluster:
 
@@ -167,14 +192,14 @@ kubectl config current-context
 kubectl cluster-info
 ```
 
-### Step 3: Configure Dremio Secrets
+### Step 4: Configure Dremio Secrets
 
-Edit `dremio-secrets.yaml` and replace the placeholder values:
+Edit `scripts/dremio-secrets.yaml` and replace the placeholder values:
 
 1. **Docker Pull Secret**: Get your Dremio Quay.io credentials and set the `<YOUR_BASE64_ENCODED_DOCKER_CONFIG_JSON>` value.
 2. **Dremio License**: Replace `<YOUR_DREMIO_LICENSE_KEY>` with your actual license key.
 
-### Step 4: Build Iceberg Kafka Connector (Optional)
+### Step 5: Build Iceberg Kafka Connector (Optional)
 
 We need to build a custom version of the Iceberg Kafka connector that includes the [Dremio Auth Manager](https://github.com/dremio/iceberg-auth-manager) for OAuth2 authentication with Dremio Catalog. The connector must contain the Dremio Auth Manager JAR in its `lib/` directory.
 
@@ -194,7 +219,7 @@ We need to build a custom version of the Iceberg Kafka connector that includes t
 Run the build script:
 
 ```bash
-./build-iceberg-kafka-connector.sh
+./scripts/build-iceberg-kafka-connector.sh
 ```
 
 The script performs the following steps:
@@ -285,22 +310,27 @@ If you build your own connector:
 1. Upload the ZIP file to an accessible URL (S3, HTTP server, etc.)
 2. Update the connector URL and checksum in `charts/confluent-resources/templates/confluent-platform-quick.yaml` (lines 171-172)
 
-### Step 5: Deploy the Stack
+### Step 6: Deploy the Stack
 
 Run the main deployment script:
 
 ```bash
-./run.sh
+# For public repositories
+./scripts/run.sh
+
+# For private repositories
+./scripts/run.sh --private-repository
 ```
 
 This script will:
 1. Generate TLS certificates for Confluent Platform (optional, you can use the provided self-signed certs)
 2. Create the `argocd` namespace
 3. Install ArgoCD using Helm
-4. Wait for Dremio namespace to be created
-5. Apply Dremio secrets
+4. Apply private repository credentials (if `--private-repository` flag is used)
+5. Wait for Dremio namespace to be created
+6. Apply Dremio secrets
 
-### Step 6: Monitor Deployment
+### Step 7: Monitor Deployment
 
 Watch the ArgoCD applications sync:
 

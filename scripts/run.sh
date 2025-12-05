@@ -3,6 +3,23 @@ set -euo pipefail
 
 # export KUBECONFIG=/path/to/your/.kube/config
 
+IS_PRIVATE_GITHUB=false
+while [[ $# -gt 0 ]]; do
+  case $1 in
+    --private-repository)
+      IS_PRIVATE_GITHUB=true
+      shift
+      ;;
+    *)
+      echo "Unknown option: $1"
+      echo "Usage: $0 [--private-repository]"
+      exit 1
+      ;;
+  esac
+done
+
+echo "Private repository mode: $IS_PRIVATE_GITHUB"
+
 mkdir -p ./charts/confluent-resources/tls
 if [ ! -f ./charts/confluent-resources/tls/ca-key.pem ]; then
   echo "Generating CA key for Confluent Platform"
@@ -22,6 +39,10 @@ else
 fi
 
 kubectl create namespace argocd --dry-run=client --kubeconfig $KUBECONFIG -o yaml | kubectl apply --kubeconfig $KUBECONFIG -f -
+
+if [ "$IS_PRIVATE_GITHUB" = true ]; then
+  kubectl apply -f ./../init-resources/argocd-git-repository.yaml -n argocd --kubeconfig $KUBECONFIG
+fi
 
 helm repo add argo-cd https://argoproj.github.io/argo-helm
 helm dependency build ./charts/argo-cd
@@ -49,5 +70,5 @@ while ! kubectl get namespace dremio --kubeconfig $KUBECONFIG >/dev/null 2>&1; d
 done
 
 echo "Dremio namespace found! Applying secrets..."
-kubectl apply -f dremio-secrets.yaml -n dremio --server-side --force-conflicts --kubeconfig $KUBECONFIG
+kubectl apply -f ./../init-resources/dremio-secrets.yaml -n dremio --server-side --force-conflicts --kubeconfig $KUBECONFIG
 echo "Secrets applied successfully!"
