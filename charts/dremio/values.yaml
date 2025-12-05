@@ -22,7 +22,13 @@ minio:
   svcaccts: 
   - accessKey: &dremioMinioUser "dremio-minio-user"
     secretKey: &dremioMinioPassword "dremio-minio-123"
-    user: *minioRootUser
+    user: console
+    policy:
+      statements:
+        - resources:
+            - 'arn:aws:s3:::dremio/*'
+          actions:
+            - "s3:*"
 
 global:
   createDremioDefaultResources: true
