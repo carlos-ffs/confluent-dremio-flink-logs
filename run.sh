@@ -1,3 +1,8 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+# export KUBECONFIG=/path/to/your/.kube/config
+
 mkdir -p ./charts/confluent-resources/tls
 if [ ! -f ./charts/confluent-resources/tls/ca-key.pem ]; then
   echo "Generating CA key for Confluent Platform"
@@ -16,7 +21,6 @@ else
   echo "CA cert for Confluent Platform already exists"
 fi
 
-export KUBECONFIG=/Users/cffs/.kube/config
 kubectl create namespace argocd --dry-run=client --kubeconfig $KUBECONFIG -o yaml | kubectl apply --kubeconfig $KUBECONFIG -f -
 
 helm repo add argo-cd https://argoproj.github.io/argo-helm

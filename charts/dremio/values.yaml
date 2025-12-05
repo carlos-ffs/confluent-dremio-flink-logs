@@ -19,15 +19,16 @@ minio:
     purge: false
     versioning: false
     objectlocking: false
-  - name: "warehouse"
-    policy: none
-    purge: false
-    versioning: false
-    objectlocking: false
   svcaccts: 
-  - accessKey: &dremioMinioUser "dremio"
-    secretKey: &dremioMinioPassword "dremio123"
+  - accessKey: &dremioMinioUser "dremio-minio-user"
+    secretKey: &dremioMinioPassword "dremio-minio-123"
     user: *minioRootUser
+
+global:
+  createDremioDefaultResources: false
+  # We set -Ddebug.addDefaultUser=true, so we can use default username/password to login which is dremio/dremio123
+  dremioUsername: "dremio"
+  dremioPassword: "dremio123"
 
 dremio-helm:
   enabled: true
@@ -210,10 +211,18 @@ dremio-helm:
 
 
   opensearchOperator:
-    useRoleBindings: false
+    useRoleBindings: true
 
   opensearch:
-    enabled: false
+    enabled: true
+    volumeSize: "5Gi"
+    resources:
+      requests:
+        memory: "1Gi"
+        cpu: "500m"
+      limits: 
+        memory: "1Gi"
+        cpu: "1"
 
   nats:
     enabled: true

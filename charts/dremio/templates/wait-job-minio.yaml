@@ -22,7 +22,7 @@ spec:
     spec:
       initContainers:
         - name: wait-for-minio
-          image: busybox
+          image: {{ index .Values "dremio-helm" "busyBox" "image" "repository" }}:{{ index .Values "dremio-helm" "busyBox" "image" "tag" }}
           command: ['sh', '-c', 'until nc -z {{ template "minio.fullname" .Subcharts.minio }} {{ .Values.minio.service.port | quote }}; do echo waiting for minio; sleep 5; done;']
       restartPolicy: OnFailure
       {{- include "minio.imagePullSecrets" . | indent 6 }}

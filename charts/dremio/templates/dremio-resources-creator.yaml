@@ -1,0 +1,157 @@
+{{- if .Values.global.createDremioDefaultResources }}
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: dremio-resources-creator
+  annotations:
+    argocd.argoproj.io/hook: Sync
+spec:
+  template:
+    spec:
+      restartPolicy: Never
+      imagePullSecrets:
+        {{- range $secret := index .Values "dremio-helm" "imagePullSecrets" }}
+        - name: {{ $secret }}
+        {{- end }}
+      initContainers:
+        - name: wait-for-dremio-master
+          image: {{ index .Values "dremio-helm" "k8s" "image" "repository" }}:{{ index .Values "dremio-helm" "k8s" "image" "tag" }}
+          imagePullPolicy: IfNotPresent
+          command: ["sh", "-c"]
+          args:
+            - |
+              DREMIO_HOST="http://dremio-client.{{ .Release.Namespace }}.svc.cluster.local:{{ index .Values "dremio-helm" "coordinator" "web" "port" }}"
+              echo "Waiting for Dremio to be ready at $DREMIO_HOST"
+
+              until curl -s -f "$DREMIO_HOST/" > /dev/null 2>&1; do
+                echo "Waiting for Dremio API to be ready..."
+                sleep 5
+              done
+
+              echo "Dremio is ready!"
+      containers:
+        - name: resources-creator
+          image: {{ index .Values "dremio-helm" "k8s" "image" "repository" }}:{{ index .Values "dremio-helm" "k8s" "image" "tag" }}
+          command:
+            - /bin/sh
+            - -c
+            - |
+              set -e
+
+              if [ -z "$DREMIO_USERNAME" ] || [ -z "$DREMIO_PASSWORD" ]; then
+                echo "Missing env vars"
+                exit 1
+              fi
+
+              DREMIO_HOST="http://dremio-client.{{ .Release.Namespace }}.svc.cluster.local:{{ index .Values "dremio-helm" "coordinator" "web" "port" }}"
+              echo "Connecting to Dremio at: $DREMIO_HOST"
+
+              echo "Authenticating with Dremio..."
+              TOKEN=$(curl -s -X POST "$DREMIO_HOST/apiv2/login" \
+                -H "Content-Type: application/json" \
+                -d "{\"userName\":\"$DREMIO_USERNAME\",\"password\":\"$DREMIO_PASSWORD\"}" \
+                | jq -r '.token')
+              echo "Authentication successful, token obtained"
+
+              echo "Creating default engine..."
+              ENGINE_RESPONSE=$(curl -s -X POST "$DREMIO_HOST/api/v3/engines" \
+                -H "Content-Type: application/json" \
+                -H "Authorization: _dremio$TOKEN" \
+                -d '{"name":"default","spec":{"targetCpuCapacity":"4C","size":"XSmall","idleTimeout":"PT15M","c3StorageSize":"5GB","spillStorageSize":"5GB","executorPodMetadata":{"annotations":{},"labels":{},"nodeSelectors":{},"tolerations":[]}}}')
+              echo "Engine creation response: $ENGINE_RESPONSE"
+              sleep 3
+
+              echo "Starting Dremio Engine..."
+              ENGINE_ID=$(echo "$ENGINE_RESPONSE" | jq -r '.id')
+              echo "Engine ID: $ENGINE_ID"
+
+              START_ENGINE_RESPONSE=$(curl -s -X PUT "$DREMIO_HOST/api/v3/engines/$ENGINE_ID/start" \
+                -H "Content-Type: application/json" \
+                -H "Authorization: _dremio$TOKEN")
+              echo "Engine start response: $START_ENGINE_RESPONSE"
+              sleep 3
+
+
+              echo "Retrieving WLM rules..."
+              WLM_RULES=$(curl -s -X GET "$DREMIO_HOST/api/v3/wlm/rule" \
+                -H "Content-Type: application/json" \
+                -H "Authorization: _dremio$TOKEN")
+              echo "WLM rules retrieved successfully"
+
+              echo "Creating Autonomous Reflections queue..."
+              QUEUE_RESPONSE=$(curl -s -X POST "$DREMIO_HOST/api/v3/wlm/queue" \
+                -H "Content-Type: application/json" \
+                -H "Authorization: _dremio$TOKEN" \
+                -d '{"cpuTier":"MEDIUM","engineId":"default","maxAllowedRunningJobs":10,"maxStartTimeoutMs":300000,"name":"Autonomous Reflections"}')
+              echo "Queue creation response: $QUEUE_RESPONSE"
+
+              QUEUE_ID=$(echo "$QUEUE_RESPONSE" | jq -r '.id')
+              echo "Queue ID: $QUEUE_ID"
+
+              NEW_RULE=$(cat <<EOF
+              {
+                "acceptId": "$QUEUE_ID",
+                "action": "PLACE",
+                "conditions": "query_type() = 'Autonomous Reflections'",
+                "name": "Autonomous Reflections",
+                "rejectMessage": ""
+              }
+              EOF
+              )
+
+              # Add the new rule to the beginning of the rules array
+              UPDATED_WLM_RULES=$(echo "$WLM_RULES" | jq --argjson newRule "$NEW_RULE" '.rules = [$newRule] + .rules')
+
+              echo "Updating WLM rules..."
+              WLM_UPDATE_RESPONSE=$(curl -s -X PUT "$DREMIO_HOST/api/v3/wlm/rule" \
+                -H "Content-Type: application/json" \
+                -H "Authorization: _dremio$TOKEN" \
+                -d "$UPDATED_WLM_RULES")
+              echo "WLM rules update response: $WLM_UPDATE_RESPONSE"
+
+              echo "Enabling autonomous reflections..."
+              REFLECTION_RESPONSE=$(curl -s -X PUT "$DREMIO_HOST/apiv2/settings/reflection.recommender.autonomous_mode.enabled" \
+                -H "Content-Type: application/json" \
+                -H "Authorization: _dremio$TOKEN" \
+                -d '{"type":"BOOLEAN","id":"reflection.recommender.autonomous_mode.enabled","value":true}')
+              echo "Autonomous reflections response: $REFLECTION_RESPONSE"
+
+              echo "Updating Samples source configuration..."
+              SAMPLES_RESPONSE=$(curl -s -X PUT "$DREMIO_HOST/apiv2/source/Samples" \
+                -H "Content-Type: application/json" \
+                -H "Authorization: _dremio$TOKEN" \
+                -d '{"config":{"externalBucketList":["samples.dremio.com"],"credentialType":"NONE","secure":false,"propertyList":[]},"name":"Samples","accelerationRefreshPeriod":3600000,"accelerationGracePeriod":10800000,"accelerationNeverRefresh":true,"accelerationNeverExpire":true,"accelerationActivePolicyType":"PERIOD","accelerationRefreshSchedule":"0 0 8 * * *","accelerationRefreshOnDataChanges":false,"type":"S3"}')
+              echo "Samples source update response: $SAMPLES_RESPONSE"
+              sleep 3
+
+              echo "Setting folder format for NYC taxi trips Iceberg data..."
+              FOLDER_FORMAT_RESPONSE=$(curl -s -X PUT "$DREMIO_HOST/apiv2/source/Samples/folder_format/samples.dremio.com/NYC-taxi-trips-iceberg" \
+                -H "Content-Type: application/json" \
+                -H "Authorization: _dremio$TOKEN" \
+                -d '{"type":"Iceberg"}')
+              echo "Folder format response: $FOLDER_FORMAT_RESPONSE"
+              sleep 3
+
+              echo "Setting file format for SF weather CSV data..."
+              FILE_FORMAT_RESPONSE=$(curl -s -X PUT "$DREMIO_HOST/apiv2/source/Samples/file_format/samples.dremio.com/SF%20weather%202018-2019.csv" \
+                -H "Content-Type: application/json" \
+                -H "Authorization: _dremio$TOKEN" \
+                -d '{"fieldDelimiter":",","quote":"\"","comment":"#","lineDelimiter":"\r\n","escape":"\"","extractHeader":true,"trimHeader":true,"skipFirstLine":false,"type":"Text"}')
+              echo "File format response: $FILE_FORMAT_RESPONSE"
+              sleep 3
+
+              echo "Setting file format for NYC weather CSV data..."
+              NYC_FILE_FORMAT_RESPONSE=$(curl -s -X PUT "$DREMIO_HOST/apiv2/source/Samples/file_format/samples.dremio.com/NYC-weather.csv" \
+                -H "Content-Type: application/json" \
+                -H "Authorization: _dremio$TOKEN" \
+                -d '{"fieldDelimiter":",","quote":"\"","comment":"#","lineDelimiter":"\r\n","escape":"\"","extractHeader":true,"trimHeader":true,"skipFirstLine":false,"type":"Text"}')
+              echo "NYC file format response: $NYC_FILE_FORMAT_RESPONSE"
+
+              echo "All Dremio resources created successfully!"
+
+          env:
+            - name: DREMIO_USERNAME
+              value: {{ .Values.global.dremioUsername | quote }}
+            - name: DREMIO_PASSWORD
+              value: {{ .Values.global.dremioPassword | quote }}
+{{- end }}
