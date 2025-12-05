@@ -34,7 +34,6 @@
     # -- Keep CRDs on chart uninstall
     keep: true
     # -- Annotations to be added to all CRDs
-    annotations: {}
     # -- Addtional labels to be added to all CRDs
     additionalLabels: {}
 

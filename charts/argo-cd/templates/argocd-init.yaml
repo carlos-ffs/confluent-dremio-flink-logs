@@ -3,8 +3,9 @@ kind: AppProject
 metadata:
   name: local-project
   namespace: argocd
-  # annotations:
-  #   "helm.sh/hook": post-install,post-upgrade
+  annotations:
+    "helm.sh/hook": post-install,post-upgrade
+    "helm.sh/resource-policy": keep
 spec:
   sourceRepos:
   - 'https://github.com/carlos-ffs/confluent-dremio-flink-logs.git'

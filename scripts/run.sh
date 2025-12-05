@@ -49,6 +49,8 @@ fi
 helm repo add argo-cd https://argoproj.github.io/argo-helm
 helm dependency build $SCRIPT_DIR/../charts/argo-cd
 
+# Install or upgrade ArgoCD
+echo "Installing/upgrading ArgoCD..."
 helm upgrade --install --atomic argocd $SCRIPT_DIR/../charts/argo-cd -n argocd --kubeconfig $KUBECONFIG
 
 # After argocd is up and running, we should apply the image pull secret
