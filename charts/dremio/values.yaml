@@ -218,11 +218,11 @@ dremio-helm:
     volumeSize: "5Gi"
     resources:
       requests:
-        memory: "2Gi"
-        cpu: "500m"
-      limits: 
         memory: "3Gi"
         cpu: "1"
+      limits: 
+        memory: "3Gi"
+        cpu: "2"
 
   nats:
     enabled: true
