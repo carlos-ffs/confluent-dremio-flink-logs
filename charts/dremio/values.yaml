@@ -219,10 +219,10 @@ dremio-helm:
     resources:
       requests:
         memory: "3Gi"
-        cpu: "1"
+        cpu: "500m"
       limits: 
-        memory: "3Gi"
-        cpu: "2"
+        memory: "4Gi"
+        cpu: "1"
 
   nats:
     enabled: true
