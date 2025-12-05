@@ -33,7 +33,7 @@ graph TB
 
         subgraph confluent["Confluent Platform"]
             kafka["Kafka Brokers (3 nodes)<br/>📨 Topic: fluent-bit<br/>⏱️ Retention: 1h / 500MB<br/>🔒 SASL_SSL encrypted"]
-            connect["Kafka Connect (3 workers)<br/>🔌 Iceberg Sink Connector<br/>⚙️ Batch commits every 60s"]
+            connect["Kafka Connect (3 workers)<br/>Iceberg Sink Connector<br/>⚙️ Batch commits every 60s"]
         end
 
         subgraph dremio["Dremio Platform"]
@@ -158,13 +158,9 @@ graph TB
 Ensure your `kubectl` is configured to point to your Kubernetes cluster:
 
 ```bash
+export KUBECONFIG=/path/to/your/.kube/config
 kubectl config current-context
 kubectl cluster-info
-```
-
-Update the `KUBECONFIG` path in `run.sh` if needed (line 19):
-```bash
-export KUBECONFIG=/path/to/your/.kube/config
 ```
 
 ### Step 2: Configure Dremio Secrets
@@ -176,7 +172,9 @@ Edit `dremio-secrets.yaml` and replace the placeholder values:
 
 ### Step 3: Build Iceberg Kafka Connector (Optional)
 
-**Note**: A pre-built connector is already configured and will be automatically downloaded by Kafka Connect. You only need to build the connector yourself if you want to:
+We need to build a custom version of the Iceberg Kafka connector that includes the [Dremio Auth Manager](https://github.com/dremio/iceberg-auth-manager) for OAuth2 authentication with Dremio Catalog. The connector must contain the Dremio Auth Manager JAR in its `lib/` directory.
+
+**Note**: A pre-built connector is already configured and will be automatically downloaded by Kafka Connect. However, in the future, the pre-build connector might be deleted from the S3 bucket. You need to build the connector yourself if you want to:
 - Use a different version of Apache Iceberg
 - Customize the connector
 - Use a different version of Dremio Auth Manager
@@ -295,7 +293,7 @@ This script will:
 1. Generate TLS certificates for Confluent Platform (optional, you can use the provided self-signed certs)
 2. Create the `argocd` namespace
 3. Install ArgoCD using Helm
-4. Wait 60 seconds for ArgoCD to be ready and dremio namespace to be created (adjust as needed)
+4. Wait for Dremio namespace to be created
 5. Apply Dremio secrets
 
 ### Step 5: Monitor Deployment
@@ -329,30 +327,33 @@ kubectl get pods -n monitoring
 
 ## Post-Deployment Configuration
 
-### 1. Generate Dremio Personal Access Token
+### 1. Update Personal Access Token (PAT) in Kafka Connector
 
-1. Access Dremio UI at `http://localhost:9047`
-2. Login with default credentials (dremio/dremio123)
-3. Go to User Settings → Personal Access Tokens
-4. Generate a new token
-5. Update the token in `charts/confluent-resources/templates/connectors.yaml`:
+1. The Dremio resources job (`charts/dremio/templates/dremio-resources-creator.yaml`) creates a PAT and stores it in a Kubernetes secret. The token has a lifetime of 179 days.
+2. To get the pat value run the following command:
+   ```bash
+   kubectl get secret dremio-root-pat -n dremio -o jsonpath='{.data.pat}' | base64 -d
+   ```
+3. Update the token in `charts/confluent-resources/templates/connectors.yaml`:
    ```yaml
    iceberg.catalog.rest.auth.oauth2.token-exchange.subject-token: "<YOUR_PAT_TOKEN>"
    ```
-6. Commit and push changes (ArgoCD will auto-sync, or you can manually sync)
+4. Commit and push changes (ArgoCD will auto-sync, or you can manually sync)
 
 ### 2. Create Dremio Source for MinIO
 
 1. In Dremio UI, add a new S3 source:
    - **Name**: `dremio-warehouse`
-   - **Access Key**: `minio`
-   - **Secret Key**: `minio123`
-   - **Root Path**: `/dremio/catalog`
-   - **Connection Properties**:
-     - `fs.s3a.endpoint`: `minio.dremio.svc.cluster.local:9000`
-     - `fs.s3a.path.style.access`: `true`
-     - `dremio.s3.compat`: `true`
-     - `fs.s3a.connection.ssl.enabled`: `false`
+   - **AWS Access Key**: `dremio-minio-user`
+   - **AWS Access Secret**: `dremio-minio-123`
+   - Disable `Encrypt connection`
+   - In **Advanced Options**:
+     - **Root Path**: `/dremio/catalog`
+     - **Connection Properties** (add the following properties):
+       - `fs.s3a.endpoint`: `minio.dremio.svc.cluster.local:9000`
+       - `fs.s3a.path.style.access`: `true`
+       - `dremio.s3.compat`: `true`
+       - `fs.s3a.connection.ssl.enabled`: `false`
 
 ### 3. Verify Data Flow
 

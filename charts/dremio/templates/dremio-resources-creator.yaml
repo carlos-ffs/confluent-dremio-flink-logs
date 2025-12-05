@@ -1,4 +1,31 @@
 {{- if .Values.global.createDremioDefaultResources }}
+---
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: &saName dremio-ws-job-pat-sa
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: Role
+metadata:
+  name: &roleName dremio-ws-job-pat-secret-role
+rules:
+  - apiGroups: [""]
+    resources: ["secrets"]
+    verbs: ["get","create","patch","update"]
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: RoleBinding
+metadata:
+  name: dremio-ws-job-pat-secret-rb
+subjects:
+  - kind: ServiceAccount
+    name: *saName
+roleRef:
+  kind: Role
+  name: *roleName
+  apiGroup: rbac.authorization.k8s.io
+---
 apiVersion: batch/v1
 kind: Job
 metadata:
@@ -9,6 +36,7 @@ spec:
   template:
     spec:
       restartPolicy: Never
+      serviceAccountName: *saName
       imagePullSecrets:
         {{- range $secret := index .Values "dremio-helm" "imagePullSecrets" }}
         - name: {{ $secret }}
@@ -47,11 +75,54 @@ spec:
               echo "Connecting to Dremio at: $DREMIO_HOST"
 
               echo "Authenticating with Dremio..."
-              TOKEN=$(curl -s -X POST "$DREMIO_HOST/apiv2/login" \
+              LOGIN_RESPONSE=$(curl -s -X POST "$DREMIO_HOST/apiv2/login" \
                 -H "Content-Type: application/json" \
-                -d "{\"userName\":\"$DREMIO_USERNAME\",\"password\":\"$DREMIO_PASSWORD\"}" \
-                | jq -r '.token')
-              echo "Authentication successful, token obtained"
+                -d "{\"userName\":\"$DREMIO_USERNAME\",\"password\":\"$DREMIO_PASSWORD\"}")
+              TOKEN=$(echo "$LOGIN_RESPONSE" | jq -r '.token')
+              USER_ID=$(echo "$LOGIN_RESPONSE" | jq -r '.userId')
+              if [ "$TOKEN" = "null" ] || [ -z "$TOKEN" ]; then
+                echo "Failed to get token"
+                echo "Login response: $LOGIN_RESPONSE"
+                exit 1
+              fi
+              if [ "$USER_ID" = "null" ] || [ -z "$USER_ID" ]; then
+                echo "Failed to get userId"
+                echo "Login response: $LOGIN_RESPONSE"
+                exit 1
+              fi
+              echo "Successfully obtained token and userId: $USER_ID"
+
+              # Check if PAT secret already exists
+              echo "Checking if secret {{ .Values.global.patSecretName }} exists..."
+              if kubectl get secret {{ .Values.global.patSecretName }} --namespace={{ .Release.Namespace }} >/dev/null 2>&1; then
+                echo "Secret {{ .Values.global.patSecretName }} already exists, skipping PAT creation"
+              else
+                echo "Secret {{ .Values.global.patSecretName }} does not exist, creating PAT..."
+
+                # Create Personal Access Token (PAT) - 179 days expiration
+                echo "Creating Personal Access Token..."
+                PAT_RESPONSE=$(curl -s -X POST "$DREMIO_HOST/api/v3/user/$USER_ID/token" \
+                  -H "Authorization: Bearer $TOKEN" \
+                  -H "Content-Type: application/json" \
+                  -d '{
+                    "label": "Kafka Connector Server Access Token",
+                    "millisecondsToExpire": 15465600000
+                  }')
+                PAT="$PAT_RESPONSE"
+                if [ -z "$PAT" ]; then
+                  echo "Failed to create PAT"
+                  echo "PAT response: $PAT_RESPONSE"
+                  exit 1
+                fi
+                echo "Successfully created PAT"
+
+                echo "Creating secret {{ .Values.global.patSecretName }}..."
+                kubectl create secret generic {{ .Values.global.patSecretName }} \
+                  --namespace={{ .Release.Namespace }} --from-literal=pat=$PAT \
+                  --dry-run=client -o yaml | kubectl --namespace={{ .Release.Namespace }} apply -f -
+                echo "Secret {{ .Values.global.patSecretName }} created successfully"
+              fi
+              
 
               # Create default catalog
               echo "Creating default catalog 'dremio-catalog'..."

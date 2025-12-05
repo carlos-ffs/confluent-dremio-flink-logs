@@ -29,6 +29,7 @@ global:
   # We set -Ddebug.addDefaultUser=true, so we can use default username/password to login which is dremio/dremio123
   dremioUsername: "dremio"
   dremioPassword: "dremio123"
+  patSecretName: "dremio-root-pat"
 
 dremio-helm:
   enabled: true
