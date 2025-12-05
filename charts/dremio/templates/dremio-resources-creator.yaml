@@ -3,12 +3,12 @@
 apiVersion: v1
 kind: ServiceAccount
 metadata:
-  name: &saName dremio-ws-job-pat-sa
+  name: dremio-ws-job-pat-sa
 ---
 apiVersion: rbac.authorization.k8s.io/v1
 kind: Role
 metadata:
-  name: &roleName dremio-ws-job-pat-secret-role
+  name: dremio-ws-job-pat-secret-role
 rules:
   - apiGroups: [""]
     resources: ["secrets"]
@@ -20,10 +20,10 @@ metadata:
   name: dremio-ws-job-pat-secret-rb
 subjects:
   - kind: ServiceAccount
-    name: *saName
+    name: dremio-ws-job-pat-sa
 roleRef:
   kind: Role
-  name: *roleName
+  name: dremio-ws-job-pat-secret-role
   apiGroup: rbac.authorization.k8s.io
 ---
 apiVersion: batch/v1
@@ -36,7 +36,7 @@ spec:
   template:
     spec:
       restartPolicy: Never
-      serviceAccountName: *saName
+      serviceAccountName: dremio-ws-job-pat-sa
       imagePullSecrets:
         {{- range $secret := index .Values "dremio-helm" "imagePullSecrets" }}
         - name: {{ $secret }}

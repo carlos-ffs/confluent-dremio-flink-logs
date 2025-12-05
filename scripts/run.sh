@@ -1,6 +1,8 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
+SCRIPT_DIR=$( cd -- "$( dirname -- "${BASH_SOURCE[0]}" )" &> /dev/null && pwd )
+
 # export KUBECONFIG=/path/to/your/.kube/config
 
 IS_PRIVATE_GITHUB=false
@@ -20,19 +22,19 @@ done
 
 echo "Private repository mode: $IS_PRIVATE_GITHUB"
 
-mkdir -p ./charts/confluent-resources/tls
-if [ ! -f ./charts/confluent-resources/tls/ca-key.pem ]; then
+mkdir -p $SCRIPT_DIR/../charts/confluent-resources/tls
+if [ ! -f $SCRIPT_DIR/../charts/confluent-resources/tls/ca-key.pem ]; then
   echo "Generating CA key for Confluent Platform"
-  openssl genrsa -out ./charts/confluent-resources/tls/ca-key.pem 2048
+  openssl genrsa -out $SCRIPT_DIR/../charts/confluent-resources/tls/ca-key.pem 2048
 else
   echo "CA key for Confluent Platform already exists"
 fi
 
-if [ ! -f ./charts/confluent-resources/tls/ca.pem ]; then
+if [ ! -f $SCRIPT_DIR/../charts/confluent-resources/tls/ca.pem ]; then
   echo "Generating CA cert for Confluent Platform"
-  openssl req -new -key ./charts/confluent-resources/tls/ca-key.pem -x509 \
+  openssl req -new -key $SCRIPT_DIR/../charts/confluent-resources/tls/ca-key.pem -x509 \
     -days 1000 \
-    -out ./charts/confluent-resources/tls/ca.pem \
+    -out $SCRIPT_DIR/../charts/confluent-resources/tls/ca.pem \
     -subj "/C=US/ST=CA/L=MountainView/O=Confluent/OU=Operator/CN=TestCA"
 else
   echo "CA cert for Confluent Platform already exists"
@@ -41,13 +43,13 @@ fi
 kubectl create namespace argocd --dry-run=client --kubeconfig $KUBECONFIG -o yaml | kubectl apply --kubeconfig $KUBECONFIG -f -
 
 if [ "$IS_PRIVATE_GITHUB" = true ]; then
-  kubectl apply -f ./../init-resources/argocd-git-repository.yaml -n argocd --kubeconfig $KUBECONFIG
+  kubectl apply -f $SCRIPT_DIR/../init-resources/argocd-git-repository.yaml -n argocd --kubeconfig $KUBECONFIG
 fi
 
 helm repo add argo-cd https://argoproj.github.io/argo-helm
-helm dependency build ./charts/argo-cd
+helm dependency build $SCRIPT_DIR/../charts/argo-cd
 
-helm upgrade --install --atomic argocd ./charts/argo-cd -n argocd --kubeconfig $KUBECONFIG
+helm upgrade --install --atomic argocd $SCRIPT_DIR/../charts/argo-cd -n argocd --kubeconfig $KUBECONFIG
 
 # After argocd is up and running, we should apply the image pull secret
 # with dremio quay credentials and license secret.
@@ -70,5 +72,5 @@ while ! kubectl get namespace dremio --kubeconfig $KUBECONFIG >/dev/null 2>&1; d
 done
 
 echo "Dremio namespace found! Applying secrets..."
-kubectl apply -f ./../init-resources/dremio-secrets.yaml -n dremio --server-side --force-conflicts --kubeconfig $KUBECONFIG
+kubectl apply -f $SCRIPT_DIR/../init-resources/dremio-secrets.yaml -n dremio --server-side --force-conflicts --kubeconfig $KUBECONFIG
 echo "Secrets applied successfully!"
