@@ -373,6 +373,21 @@ kubectl get pods -n monitoring
    iceberg.catalog.rest.auth.oauth2.token-exchange.subject-token: "<YOUR_PAT_TOKEN>"
    ```
 4. Commit and push changes (ArgoCD will auto-sync, or you can manually sync)
+5. Verify the data Flow, by checking that logs are flowing through the pipeline:
+    ```bash
+    # Check Kafka topic has messages
+    kubectl port-forward svc/controlcenter -n confluent 9021:9021
+    # Access Control Center at https://localhost:9021
+    # Login with default credentials (c3/c3-secret)
+    # Check "Topics" and verify "fluent-bit" has messages
+
+    # Check connector status
+    kubectl get connector -n confluent
+    kubectl describe connector fluent-bit-dremio-sink -n confluent
+
+    # Check the connect server logs
+    kubectl logs -n confluent connect-0
+    ```
 
 ### 2. Create Dremio Source for MinIO
 
@@ -389,26 +404,26 @@ After checking that the connector is running and data is being written to Iceber
        - `fs.s3a.endpoint`: `minio.dremio.svc.cluster.local:9000`
        - `fs.s3a.path.style.access`: `true`
        - `dremio.s3.compat`: `true`
+2. Format the data folder:
+   - Select the `fluent-bit-logs` source
+   - On the `data` folder click on `Format Folder` (right side)
+   - Choose `Parquet` as the format
+   - Click `Save`
 
-### 3. Verify Data Flow
+3. Now you can query the data using Dremio's SQL interface, something like:
+   ```sql
+    SELECT 
+        CAST(CONCAT(SUBSTR(REGEXP_REPLACE(REGEXP_REPLACE(data."time",'Z$',''),'T',' '),1, 19),'.',
+            LPAD(SUBSTR(COALESCE(REGEXP_EXTRACT(REGEXP_REPLACE(REGEXP_REPLACE(data."time",'Z$',''),'T',' '), '\\.(\\d+)', 1), '000'),1, 3),3, '0')) AS TIMESTAMP) 
+            AS timestamp_,
+        data.kubernetes.pod_name AS pod_name, 
+        data.kubernetes.namespace_name AS namespace,
+        log, data."stream" AS "stream", kubernetes
+    FROM "fluent-bit-logs".data AS data
+    WHERE data.log LIKE '%error%'
+    ORDER BY timestamp_ DESC
+   ```
 
-Check that logs are flowing through the pipeline:
-
-```bash
-# Check Kafka topic has messages
-kubectl port-forward svc/controlcenter -n confluent 9021:9021
-# Access Control Center at http://localhost:9021
-# Login with default credentials (c3/c3-secret)
-# Check "Topics" and verify "fluent-bit" has messages
-
-# Check connector status
-kubectl get connector -n confluent
-kubectl describe connector fluent-bit-dremio-sink -n confluent
-
-# Query data in Dremio
-# In Dremio UI, run:
-# SELECT * FROM fluent_bit.logs LIMIT 10;
-```
 
 
 ## Component Details
