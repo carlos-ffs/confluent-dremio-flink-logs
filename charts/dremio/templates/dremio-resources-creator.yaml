@@ -120,7 +120,7 @@ spec:
               SAMPLES_RESPONSE=$(curl -s -X PUT "$DREMIO_HOST/apiv2/source/Samples" \
                 -H "Content-Type: application/json" \
                 -H "Authorization: _dremio$TOKEN" \
-                -d '{"config":{"externalBucketList":["samples.dremio.com"],"credentialType":"NONE","secure":false,"propertyList":[{name: "fs.s3a.endpoint", value: "s3.us-west-2.amazonaws.com"}]},"name":"Samples","accelerationRefreshPeriod":3600000,"accelerationGracePeriod":10800000,"accelerationNeverRefresh":true,"accelerationNeverExpire":true,"accelerationActivePolicyType":"PERIOD","accelerationRefreshSchedule":"0 0 8 * * *","accelerationRefreshOnDataChanges":false,"type":"S3"}')
+                -d '{"config":{"externalBucketList":["samples.dremio.com"],"credentialType":"NONE","secure":false,"propertyList":[{"name": "fs.s3a.endpoint", "value": "s3.us-west-2.amazonaws.com"}]},"name":"Samples","accelerationRefreshPeriod":3600000,"accelerationGracePeriod":10800000,"accelerationNeverRefresh":true,"accelerationNeverExpire":true,"accelerationActivePolicyType":"PERIOD","accelerationRefreshSchedule":"0 0 8 * * *","accelerationRefreshOnDataChanges":false,"type":"S3"}')
               echo "Samples source update response: $SAMPLES_RESPONSE"
               sleep 3
 
