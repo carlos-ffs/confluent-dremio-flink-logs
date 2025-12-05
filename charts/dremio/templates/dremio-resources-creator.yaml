@@ -232,7 +232,7 @@ spec:
               echo "NYC file format response: $NYC_FILE_FORMAT_RESPONSE"
 
               echo "All Dremio resources created successfully!"
-
+              
           env:
             - name: DREMIO_USERNAME
               value: {{ .Values.global.dremioUsername | quote }}

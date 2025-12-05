@@ -376,18 +376,19 @@ kubectl get pods -n monitoring
 
 ### 2. Create Dremio Source for MinIO
 
+After checking that the connector is running and data is being written to Iceberg tables, you need to create a Dremio source to query the data. This source will point to the MinIO bucket where Iceberg stores its data. Based on the connector configuration, the data will be written to the `fluent_bit.logs` table in the `dremio` bucket, which translates to `s3://dremio/catalog/fluent_bit/logs`.
+
 1. In Dremio UI, add a new S3 source:
-   - **Name**: `dremio-warehouse`
+   - **Name**: `fluent-bit-logs`
    - **AWS Access Key**: `dremio-minio-user`
    - **AWS Access Secret**: `dremio-minio-123`
    - Disable `Encrypt connection`
    - In **Advanced Options**:
-     - **Root Path**: `/dremio/catalog`
+     - **Root Path**: `/dremio/catalog/fluent_bit/logs`
      - **Connection Properties** (add the following properties):
        - `fs.s3a.endpoint`: `minio.dremio.svc.cluster.local:9000`
        - `fs.s3a.path.style.access`: `true`
        - `dremio.s3.compat`: `true`
-       - `fs.s3a.connection.ssl.enabled`: `false`
 
 ### 3. Verify Data Flow
 

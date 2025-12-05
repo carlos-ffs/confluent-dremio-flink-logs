@@ -27,7 +27,6 @@ minio:
       statements:
         - resources:
             - 'arn:aws:s3:::dremio/*'
-            - 'arn:aws:s3:::dremio-catalog/*'
           actions:
             - "s3:*"
 
