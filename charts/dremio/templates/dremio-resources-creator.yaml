@@ -53,6 +53,15 @@ spec:
                 | jq -r '.token')
               echo "Authentication successful, token obtained"
 
+              # Create default catalog
+              echo "Creating default catalog 'dremio-catalog'..."
+              CATALOG_RESPONSE=$(curl -s -X PUT "$DREMIO_HOST/apiv2/source/dremio-catalog" \
+                -H "Content-Type: application/json" \
+                -H "Authorization: _dremio$TOKEN" \
+                -d '{"name":"dremio-catalog","config":{"defaultStorageUri":"s3://dremio/catalog","storageAccessCredential":"CREDENTIAL_VENDING","storageProvider":"AWS","credentialType":"ACCESS_KEY","azureAuthenticationType":"ACCESS_KEY","googleAuthenticationType":"SERVICE_ACCOUNT_KEYS","secure":true,"propertyList":[],"enableAsync":true,"isCachingEnabled":true,"maxCacheSpacePct":100,"enableAutoOptimization":true,"enableTableCleanup":true},"accelerationRefreshPeriod":3600000,"accelerationGracePeriod":10800000,"accelerationActivePolicyType":"PERIOD","accelerationRefreshSchedule":"0 0 8 * * *","accelerationRefreshOnDataChanges":false,"metadataPolicy":{"deleteUnavailableDatasets":true,"namesRefreshMillis":3600000,"datasetDefinitionRefreshAfterMillis":3600000,"datasetDefinitionExpireAfterMillis":10800000,"authTTLMillis":86400000,"updateMode":"PREFETCH_QUERIED"},"accessControlList":{"userControls":[],"roleControls":[]},"type":"DREMIO_CATALOG_V1"}')
+              echo "Catalog creation response: $CATALOG_RESPONSE"
+              sleep 3
+
               echo "Creating default engine..."
               ENGINE_RESPONSE=$(curl -s -X POST "$DREMIO_HOST/api/v3/engines" \
                 -H "Content-Type: application/json" \
