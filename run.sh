@@ -32,5 +32,22 @@ helm upgrade --install --atomic argocd ./charts/argo-cd -n argocd --kubeconfig $
 # with dremio quay credentials and license secret.
 # On the other hand, if you are using an EKS, GKE, or AKS,
 # you can leverage external-secrets to manage the pull secret seemlessly.
-sleep 60 # Depends on the cluster size.
+echo "Waiting for dremio namespace to be created..."
+TIMEOUT=300  # 5 minutes timeout
+ELAPSED=0
+INTERVAL=5
+
+while ! kubectl get namespace dremio --kubeconfig $KUBECONFIG >/dev/null 2>&1; do
+  if [ $ELAPSED -ge $TIMEOUT ]; then
+    echo "ERROR: Timeout waiting for dremio namespace to be created after ${TIMEOUT} seconds"
+    echo "Please check ArgoCD applications and ensure the dremio ApplicationSet is deployed"
+    exit 1
+  fi
+  echo "Waiting for dremio namespace... (${ELAPSED}s/${TIMEOUT}s)"
+  sleep $INTERVAL
+  ELAPSED=$((ELAPSED + INTERVAL))
+done
+
+echo "Dremio namespace found! Applying secrets..."
 kubectl apply -f dremio-secrets.yaml -n dremio --server-side --force-conflicts --kubeconfig $KUBECONFIG
+echo "Secrets applied successfully!"
