@@ -15,7 +15,7 @@ spec:
         {{- end }}
       initContainers:
         - name: wait-for-dremio-master
-          image: {{ index .Values "dremio-helm" "k8s" "image" "repository" }}:{{ index .Values "dremio-helm" "k8s" "image" "tag" }}
+          image: {{ index .Values "dremio-helm" "utils" "image" "repository" }}:{{ index .Values "dremio-helm" "utils" "image" "tag" }}
           imagePullPolicy: IfNotPresent
           command: ["sh", "-c"]
           args:
@@ -31,7 +31,7 @@ spec:
               echo "Dremio is ready!"
       containers:
         - name: resources-creator
-          image: {{ index .Values "dremio-helm" "k8s" "image" "repository" }}:{{ index .Values "dremio-helm" "k8s" "image" "tag" }}
+          image: {{ index .Values "dremio-helm" "utils" "image" "repository" }}:{{ index .Values "dremio-helm" "utils" "image" "tag" }}
           command:
             - /bin/sh
             - -c
