@@ -99,16 +99,17 @@ spec:
               echo "Queue ID: $QUEUE_ID"
 
               if [ "$QUEUE_ID" != "null" ]; then
-                NEW_RULE=$(cat <<EOF
-                {
-                  "acceptId": "$QUEUE_ID",
-                  "action": "PLACE",
-                  "conditions": "query_type() = 'Autonomous Reflections'",
-                  "name": "Autonomous Reflections",
-                  "rejectMessage": ""
-                }
-                EOF
-                )
+                NEW_RULE=$(cat <<'EOF'
+              {
+                "acceptId": "QUEUE_ID_PLACEHOLDER",
+                "action": "PLACE",
+                "conditions": "query_type() = 'Autonomous Reflections'",
+                "name": "Autonomous Reflections",
+                "rejectMessage": ""
+              }
+              EOF
+              )
+                NEW_RULE=$(echo "$NEW_RULE" | sed "s/QUEUE_ID_PLACEHOLDER/$QUEUE_ID/")
 
                 # Add the new rule to the beginning of the rules array
                 UPDATED_WLM_RULES=$(echo "$WLM_RULES" | jq --argjson newRule "$NEW_RULE" '.rules = [$newRule] + .rules')

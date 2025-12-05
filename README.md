@@ -1,5 +1,7 @@
 # Real-Time Log Analytics with Confluent, Dremio & Apache Iceberg
 
+#### MISSING ADDING DREMIO DEFAULT USER TO THE CATALOG RULES
+
 This workshop demonstrates a real-time log analytics pipeline that streams Kubernetes logs into a queryable data lakehouse. The architecture combines Confluent Platform for streaming, Apache Iceberg for table format, and Dremio for SQL analytics - all deployed on Kubernetes using GitOps principles with ArgoCD.
 
 **What You'll Build**: A complete pipeline that captures every log from your Kubernetes cluster, streams it through Kafka, transforms it into Iceberg tables, and makes it instantly queryable through Dremio's SQL interface - enabling real-time log analytics, troubleshooting, and observability at scale.
