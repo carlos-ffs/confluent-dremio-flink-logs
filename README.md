@@ -153,7 +153,11 @@ graph TB
 
 ## Setup Instructions
 
-### Step 1: Configure Kubernetes Context
+### Step 1: Fork This Repository
+
+Fork this repository to your own GitHub account so you can make changes and have ArgoCD sync from your fork.
+
+### Step 2: Configure Kubernetes Context
 
 Ensure your `kubectl` is configured to point to your Kubernetes cluster:
 
@@ -163,14 +167,14 @@ kubectl config current-context
 kubectl cluster-info
 ```
 
-### Step 2: Configure Dremio Secrets
+### Step 3: Configure Dremio Secrets
 
 Edit `dremio-secrets.yaml` and replace the placeholder values:
 
 1. **Docker Pull Secret**: Get your Dremio Quay.io credentials and set the `<YOUR_BASE64_ENCODED_DOCKER_CONFIG_JSON>` value.
 2. **Dremio License**: Replace `<YOUR_DREMIO_LICENSE_KEY>` with your actual license key.
 
-### Step 3: Build Iceberg Kafka Connector (Optional)
+### Step 4: Build Iceberg Kafka Connector (Optional)
 
 We need to build a custom version of the Iceberg Kafka connector that includes the [Dremio Auth Manager](https://github.com/dremio/iceberg-auth-manager) for OAuth2 authentication with Dremio Catalog. The connector must contain the Dremio Auth Manager JAR in its `lib/` directory.
 
@@ -281,7 +285,7 @@ If you build your own connector:
 1. Upload the ZIP file to an accessible URL (S3, HTTP server, etc.)
 2. Update the connector URL and checksum in `charts/confluent-resources/templates/confluent-platform-quick.yaml` (lines 171-172)
 
-### Step 4: Deploy the Stack
+### Step 5: Deploy the Stack
 
 Run the main deployment script:
 
@@ -296,7 +300,7 @@ This script will:
 4. Wait for Dremio namespace to be created
 5. Apply Dremio secrets
 
-### Step 5: Monitor Deployment
+### Step 6: Monitor Deployment
 
 Watch the ArgoCD applications sync:
 

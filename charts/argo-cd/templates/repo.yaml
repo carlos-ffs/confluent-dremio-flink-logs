@@ -10,5 +10,5 @@ metadata:
 stringData:
   type: git
   url: https://github.com/carlos-ffs/confluent-dremio-flink-logs.git
-  password: <password>
+  password: <token>
   username: <username>

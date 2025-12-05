@@ -1,4 +1,5 @@
 /.DS_Store
 /producer/kafka_*/
 /producer/ca.crt
-charts/argo-cd/templates/repo.yaml
+/charts/argo-cd/charts/*
+**/Chart.lock
