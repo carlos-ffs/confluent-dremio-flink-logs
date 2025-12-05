@@ -16,7 +16,6 @@ The workshop sets up the following components:
 - **Fluent Bit**: Log aggregation and forwarding to Kafka
 - **MinIO**: S3-compatible object storage for Iceberg tables
 - **ArgoCD**: GitOps continuous deployment
-- **Prometheus Stack**: Monitoring and observability
 
 ### Data Flow Pipeline
 
@@ -263,7 +262,8 @@ After building, you need to make the connector available to Kafka Connect:
    aws s3 presign s3://your-bucket/connectors/iceberg-kafka-connect-with-authmgr-0.1.3.zip
    ```
    
-   **Important Note:** Your uploaded ZIP file URL must end with `.zip` for Confluent Kafka Connect to recognize it as a plugin archive.
+   > [!IMPORTANT]
+   > Your uploaded ZIP file URL must end with `.zip` for Confluent Kafka Connect to recognize it as a plugin archive.
 
 2. **Update the connector configuration** in `charts/confluent-resources/templates/confluent-platform-quick.yaml`:
    ```yaml
@@ -397,7 +397,7 @@ Check that logs are flowing through the pipeline:
 # Check Kafka topic has messages
 kubectl port-forward svc/controlcenter -n confluent 9021:9021
 # Access Control Center at http://localhost:9021
-# Login with default credentials (kafka/kafka-secret)
+# Login with default credentials (c3/c3-secret)
 # Check "Topics" and verify "fluent-bit" has messages
 
 # Check connector status
@@ -412,24 +412,29 @@ kubectl describe connector fluent-bit-dremio-sink -n confluent
 
 ## Component Details
 
-### Confluent Platform
+### Confluent for Kubernetes (CFK)
+
+CFK is a cloud-native management control plane for deploying and managing Confluent in your Kubernetes private cloud environment. It provides a standard and simple interface to customize, deploy, and manage Confluent Platform through declarative API.
 
 **Namespace**: `confluent`
 
 **Components**:
-- **KRaft Controllers**: 3 replicas for metadata management
-- **Kafka Brokers**: 3 replicas with internal and external listeners
-- **Schema Registry**: 1 replica
-- **Kafka Connect**: 3 replicas with Iceberg connector pre-installed
-- **ksqlDB**: 1 replica for stream processing
-- **Control Center**: 1 replica for management UI
-- **Kafka REST Proxy**: 1 replica
+  - **KRaft Controllers**: 3 replicas for metadata management
+  - **Kafka Brokers**: 3 replicas with internal and external listeners
+  - **Schema Registry**: 1 replica
+  - **Kafka Connect**: 3 replicas with Iceberg connector pre-installed
+  - **ksqlDB**: 1 replica for stream processing
+  - **Control Center**: 1 replica for management UI
+  - **Kafka REST Proxy**: 1 replica
 
 **Access**:
 ```bash
 # Control Center UI
 kubectl port-forward svc/controlcenter -n confluent 9021:9021
 # Access at http://localhost:9021
+# Login with default credentials:
+#   - Username: c3
+#   - Password: c3-secret
 
 # External Kafka access (NodePort)
 # Brokers available at localhost:30000, localhost:30001, localhost:30002
@@ -441,6 +446,8 @@ kubectl port-forward svc/controlcenter -n confluent 9021:9021
 - Credentials stored in secrets (check `charts/confluent-resources/templates/users-secret.yaml`)
 
 ### Dremio
+
+Dremio is a high-performance data lakehouse platform that enables self-service analytics and AI directly on data lakes (like S3, ADLS) and other sources, allowing users to run SQL queries with data warehouse speeds, without complex data movement. Built on open standards (Arrow, Iceberg, Polaris), it offers a unified semantic layer, data virtualization, and autonomous query optimization (via "Reflections") for lightning-fast BI and AI agent access, making data engineering simpler and eliminating vendor lock-in. 
 
 **Namespace**: `dremio`
 
@@ -458,7 +465,6 @@ kubectl port-forward svc/controlcenter -n confluent 9021:9021
 # Dremio UI
 kubectl port-forward svc/dremio-client -n dremio 9047:9047
 # Access at http://localhost:9047
-
 # Default credentials (since we set debug.addDefaultUser=true)
 # Username: dremio
 # Password: dremio123
