@@ -71,6 +71,20 @@ while ! kubectl get namespace dremio --kubeconfig $KUBECONFIG >/dev/null 2>&1; d
   ELAPSED=$((ELAPSED + INTERVAL))
 done
 
-echo "Dremio namespace found! Applying secrets..."
+echo "Waiting for dremio-license secret to be created..."
+ELAPSED=0
+while ! kubectl get secret dremio-license -n dremio --kubeconfig $KUBECONFIG >/dev/null 2>&1; do
+  if [ $ELAPSED -ge $TIMEOUT ]; then
+    echo "ERROR: Timeout waiting for dremio-license secret to be created after ${TIMEOUT} seconds"
+    echo "Please check if the dremio-secrets.yaml was applied correctly"
+    exit 1
+  fi
+  echo "Waiting for dremio-license secret... (${ELAPSED}s/${TIMEOUT}s)"
+  sleep $INTERVAL
+  ELAPSED=$((ELAPSED + INTERVAL))
+done
+echo "dremio-license secret found! Applying secrets..."
+
 kubectl apply -f $SCRIPT_DIR/../init-resources/dremio-secrets.yaml -n dremio --server-side --force-conflicts --kubeconfig $KUBECONFIG
 echo "Secrets applied successfully!"
+
