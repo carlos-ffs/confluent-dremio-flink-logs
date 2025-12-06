@@ -262,8 +262,8 @@ After building, you need to make the connector available to Kafka Connect:
    aws s3 presign s3://your-bucket/connectors/iceberg-kafka-connect-with-authmgr-0.1.3.zip
    ```
    
-   > [!IMPORTANT] 
-   Your uploaded ZIP file URL must end with `.zip` for Confluent Kafka Connect to recognize it as a plugin archive.
+> [!IMPORTANT] 
+> Your uploaded ZIP file URL must end with `.zip` for Confluent Kafka Connect to recognize it as a plugin archive.
 
 2. **Update the connector configuration** in `charts/confluent-resources/templates/confluent-platform-quick.yaml`:
    ```yaml
