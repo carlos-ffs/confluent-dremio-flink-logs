@@ -1,10 +1,33 @@
-# Real-Time Log Analytics with Confluent, Dremio & Apache Iceberg
+# Real-Time Log Analytics with Confluent, Dremio & Apache Iceberg <!-- omit in toc -->
 
 #### MISSING ADDING DREMIO DEFAULT USER TO THE CATALOG RULES
 
 This workshop demonstrates a real-time log analytics pipeline that streams Kubernetes logs into a queryable data lakehouse. The architecture combines Confluent Platform for streaming, Apache Iceberg for table format, and Dremio for SQL analytics - all deployed on Kubernetes using GitOps principles with ArgoCD.
 
 **What You'll Build**: A complete pipeline that captures every log from your Kubernetes cluster, streams it through Kafka, transforms it into Iceberg tables, and makes it instantly queryable through Dremio's SQL interface - enabling real-time log analytics, troubleshooting, and observability at scale.
+
+## Table of Contents <!-- omit in toc -->
+
+- [Architecture Overview](#architecture-overview)
+  - [Data Flow Pipeline](#data-flow-pipeline)
+    - [Pipeline Stages Explained](#pipeline-stages-explained)
+    - [Key Benefits of This Architecture](#key-benefits-of-this-architecture)
+- [Prerequisites](#prerequisites)
+  - [Required Software](#required-software)
+  - [System Requirements](#system-requirements)
+- [Setup Instructions](#setup-instructions)
+  - [Step 1: Fork This Repository](#step-1-fork-this-repository)
+  - [Step 2: Configure Private Repository Access (If Applicable)](#step-2-configure-private-repository-access-if-applicable)
+  - [Step 3: Configure Kubernetes Context](#step-3-configure-kubernetes-context)
+  - [Step 4: Configure Dremio Secrets](#step-4-configure-dremio-secrets)
+  - [Step 5: Build Iceberg Kafka Connector (Optional)](#step-5-build-iceberg-kafka-connector-optional)
+  - [Step 6: Deploy the Stack](#step-6-deploy-the-stack)
+  - [Step 7: Monitor Deployment](#step-7-monitor-deployment)
+- [Post-Deployment Configuration](#post-deployment-configuration)
+  - [1. Update Personal Access Token (PAT) in Kafka Connector](#1-update-personal-access-token-pat-in-kafka-connector)
+  - [2. Create Dremio Source for MinIO](#2-create-dremio-source-for-minio)
+  - [Common Issues](#common-issues)
+- [Useful Resources](#useful-resources)
 
 ## Architecture Overview
 
@@ -36,12 +59,12 @@ graph TB
         end
 
         subgraph dremio["Dremio Platform"]
-            catalog["Dremio Catalog Services<br/>📋 REST Catalog API<br/>🔐 OAuth2 authentication<br/>📊 Table: fluent_bit.logs"]
+            catalog["Dremio Catalog Services<br/>REST Catalog API<br/>🔐 OAuth2 authentication<br/>Table: fluent_bit.logs"]
             coordinator["Dremio Coordinator + Executors<br/>🔍 SQL Query Engine<br/>⏮️ Time travel queries<br/>📈 Real-time analytics"]
         end
 
         subgraph storage["Object Storage"]
-            minio["MinIO (S3-compatible)<br/>🗄️ Bucket: dremio<br/>📦 Parquet data files<br/>📝 Iceberg metadata"]
+            minio["MinIO (S3-compatible)<br/>Bucket: dremio<br/>Parquet data files<br/>Iceberg metadata"]
         end
     end
 
