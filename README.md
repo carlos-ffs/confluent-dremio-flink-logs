@@ -92,43 +92,17 @@ graph TB
 
 #### Pipeline Stages Explained
 
-1. **Log Collection (Fluent Bit)**
-   - Deployed as a DaemonSet on every Kubernetes node
-   - Automatically discovers and tails logs from all pods
-   - Enriches logs with Kubernetes metadata (namespace, pod name, labels, etc.)
-   - Formats logs as JSON for structured processing
+1. **Log Collection (Fluent Bit)**: Fluent Bit runs as a DaemonSet on every Kubernetes node, automatically discovering and tailing logs from all running pods. It enriches each log entry with Kubernetes metadata — such as the namespace, pod name, and labels — and formats everything as structured JSON for easier downstream processing.
 
-2. **Stream Buffering (Kafka)**
-   - Receives logs on the `fluent-bit` topic
-   - Provides durability and replay capability (1-hour retention)
-   - Enables decoupling between log collection and processing
-   - Handles backpressure and ensures no log loss
+2. **Stream Buffering (Kafka)**: All collected logs are streamed into Kafka, landing on the fluent-bit topic. Kafka acts as a durable buffer with a one-hour retention window, ensuring that no logs are lost even during processing slowdowns. This setup decouples log collection from processing, providing replay capability and handling backpressure gracefully.
 
-3. **Lakehouse Integration (Iceberg Sink Connector)**
-   - Consumes logs from Kafka in micro-batches
-   - Automatically creates the `fluent_bit.logs` Iceberg table
-   - Converts JSON logs to Parquet format for efficient storage
-   - Commits data every 60 seconds for near-real-time availability
-   - Handles schema evolution as log formats change
+3. **Lakehouse Integration (Iceberg Sink Connector)**: An Iceberg Sink Connector consumes logs from Kafka in small, continuous batches. It automatically creates and manages an Iceberg table named fluent_bit.logs, converting JSON logs into Parquet files for efficient analytics and storage. Data is committed every 60 seconds, making logs available for near-real-time analysis, while schema evolution is handled automatically as log formats change.
 
-4. **Catalog Management (Dremio Catalog Services)**
-   - Provides REST Catalog API for Iceberg operations
-   - Manages table metadata, snapshots, and schema versions
-   - Authenticates connector via OAuth2 with Personal Access Token
-   - Coordinates concurrent writes and maintains ACID guarantees
+4. **Catalog Management (Dremio Catalog Services)**: The Dremio Catalog Services component exposes a REST-based Catalog API used for managing Iceberg operations. It maintains table metadata, schema versions, and snapshots while enforcing ACID guarantees for concurrent writes. Authentication is handled via OAuth2 using a personal access token.
 
-5. **Object Storage (MinIO)**
-   - Stores Iceberg data files in Parquet format
-   - Stores Iceberg metadata files (manifests, snapshots)
-   - Provides S3-compatible API for seamless integration
-   - Enables cost-effective, scalable storage
+5. **Object Storage (MinIO)**: MinIO serves as the object storage layer, holding both the Parquet data files and the associated Iceberg metadata (such as manifests and snapshots). Because it provides an S3-compatible API, it integrates seamlessly with the rest of the pipeline while offering scalable, cost-effective storage.
 
-6. **Analytics Layer (Dremio)**
-   - Queries Iceberg tables directly from MinIO
-   - Provides SQL interface for log analysis
-   - Supports time travel to query historical snapshots
-   - Enables joins with other data sources
-   - Powers dashboards and visualizations
+6. **Analytics Layer (Dremio)**: Finally, Dremio provides the analytics interface, querying Iceberg tables stored in MinIO directly. Users can run SQL queries on the logs, perform time-travel queries to inspect historical data, and join log data with other sources. This layer powers dashboards, reports, and visualizations for observability and operational insights.
 
 #### Key Benefits of This Architecture
 
