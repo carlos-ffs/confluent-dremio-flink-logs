@@ -92,7 +92,7 @@ graph TB
 
 #### Pipeline Stages Explained
 
-1. **Log Collection (Fluent Bit)**: Fluent Bit runs as a DaemonSet on every Kubernetes node, automatically discovering and tailing logs from all running pods. It enriches each log entry with Kubernetes metadata — such as the namespace, pod name, and labels — and formats everything as structured JSON for easier downstream processing.
+1. **Log Collection (Fluent Bit)**: Fluent Bit runs as a DaemonSet on every Kubernetes node, automatically discovering and tailing logs from all running pods. It enriches each log entry with Kubernetes metadata, such as the namespace, pod name, and labels. It also applies custom filters and formats everything as structured JSON for easier downstream processing.
 
 2. **Stream Buffering (Kafka)**: All collected logs are streamed into Kafka, landing on the fluent-bit topic. Kafka acts as a durable buffer with a one-hour retention window, ensuring that no logs are lost even during processing slowdowns. This setup decouples log collection from processing, providing replay capability and handling backpressure gracefully.
 
