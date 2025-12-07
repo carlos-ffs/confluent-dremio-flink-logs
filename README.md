@@ -201,10 +201,12 @@ Edit `scripts/dremio-secrets.yaml` and replace the placeholder values:
 ### Step 5: Build Iceberg Kafka Connector (Optional)
 
 > [!NOTE]
-> A **pre-built connector is already configured** and will be automatically downloaded by Kafka Connect. Skip this step unless you need to customize the connector.
+> A **pre-built connector is already configured** and will be automatically downloaded from my S3 bucket (public read access). You only need to build a custom connector if you want to customize it or if the pre-built version is unavailable.
 
-If you want to build a custom version of the Iceberg Kafka connector with the [Dremio Auth Manager](https://github.com/dremio/iceberg-auth-manager), see the detailed guide:
- 
+The Iceberg Kafka connector requires the [Dremio Auth Manager](https://github.com/dremio/iceberg-auth-manager) JAR in its `lib/` directory for OAuth2 authentication with Dremio Catalog.
+
+To build a custom version, see:
+
 > **[Build Iceberg Kafka Connector Documentation](docs/build-iceberg-kafka-connector.md)**
 
 
