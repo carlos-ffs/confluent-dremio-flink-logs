@@ -1,0 +1,253 @@
+{{- if .Values.global.createDremioDefaultResources }}
+---
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: dremio-ws-job-pat-sa
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: Role
+metadata:
+  name: dremio-ws-job-pat-secret-role
+rules:
+  - apiGroups: [""]
+    resources: ["secrets"]
+    verbs: ["get","create","patch","update"]
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: RoleBinding
+metadata:
+  name: dremio-ws-job-pat-secret-rb
+subjects:
+  - kind: ServiceAccount
+    name: dremio-ws-job-pat-sa
+roleRef:
+  kind: Role
+  name: dremio-ws-job-pat-secret-role
+  apiGroup: rbac.authorization.k8s.io
+---
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: dremio-resources-creator
+  annotations:
+    argocd.argoproj.io/hook: Sync
+spec:
+  template:
+    spec:
+      restartPolicy: Never
+      serviceAccountName: dremio-ws-job-pat-sa
+      imagePullSecrets:
+        {{- range $secret := index .Values "dremio-helm" "imagePullSecrets" }}
+        - name: {{ $secret }}
+        {{- end }}
+      initContainers:
+        - name: wait-for-dremio-master
+          image: {{ index .Values "dremio-helm" "utils" "image" "repository" }}:{{ index .Values "dremio-helm" "utils" "image" "tag" }}
+          imagePullPolicy: IfNotPresent
+          command: ["sh", "-c"]
+          args:
+            - |
+              DREMIO_HOST="http://dremio-client.{{ .Release.Namespace }}.svc.cluster.local:{{ index .Values "dremio-helm" "coordinator" "web" "port" }}"
+              CATALOG_HOST="http://dremio-catalog-server.{{ .Release.Namespace }}.svc.cluster.local:9181"
+              echo "Waiting for Dremio to be ready at $DREMIO_HOST"
+
+              until curl -s -f "$DREMIO_HOST/" > /dev/null 2>&1; do
+                echo "Waiting for Dremio API to be ready..."
+                sleep 5
+              done
+
+              until HTTP_CODE=$(curl -s -o /dev/null -w "%{http_code}" "$CATALOG_HOST"); [ "$HTTP_CODE" = "200" ] || [ "$HTTP_CODE" = "401" ]; do
+                echo "Waiting for Dremio Catalog Server to be ready... (HTTP $HTTP_CODE)"
+                sleep 5
+              done
+              echo "Dremio Catalog Server is ready! (HTTP $HTTP_CODE)"
+
+              echo "Dremio is ready!"
+      containers:
+        - name: resources-creator
+          image: {{ index .Values "dremio-helm" "utils" "image" "repository" }}:{{ index .Values "dremio-helm" "utils" "image" "tag" }}
+          command:
+            - /bin/sh
+            - -c
+            - |
+              set -e
+
+              if [ -z "$DREMIO_USERNAME" ] || [ -z "$DREMIO_PASSWORD" ]; then
+                echo "Missing env vars"
+                exit 1
+              fi
+
+              DREMIO_HOST="http://dremio-client.{{ .Release.Namespace }}.svc.cluster.local:{{ index .Values "dremio-helm" "coordinator" "web" "port" }}"
+              echo "Connecting to Dremio at: $DREMIO_HOST"
+
+              echo "Authenticating with Dremio..."
+              LOGIN_RESPONSE=$(curl -s -X POST "$DREMIO_HOST/apiv2/login" \
+                -H "Content-Type: application/json" \
+                -d "{\"userName\":\"$DREMIO_USERNAME\",\"password\":\"$DREMIO_PASSWORD\"}")
+              TOKEN=$(echo "$LOGIN_RESPONSE" | jq -r '.token')
+              USER_ID=$(echo "$LOGIN_RESPONSE" | jq -r '.userId')
+              if [ "$TOKEN" = "null" ] || [ -z "$TOKEN" ]; then
+                echo "Failed to get token"
+                echo "Login response: $LOGIN_RESPONSE"
+                exit 1
+              fi
+              if [ "$USER_ID" = "null" ] || [ -z "$USER_ID" ]; then
+                echo "Failed to get userId"
+                echo "Login response: $LOGIN_RESPONSE"
+                exit 1
+              fi
+              echo "Successfully obtained token and userId: $USER_ID"
+
+              # Check if PAT secret already exists
+              echo "Checking if secret {{ .Values.global.patSecretName }} exists..."
+              if kubectl get secret {{ .Values.global.patSecretName }} --namespace={{ .Release.Namespace }} >/dev/null 2>&1; then
+                echo "Secret {{ .Values.global.patSecretName }} already exists, skipping PAT creation"
+              else
+                echo "Secret {{ .Values.global.patSecretName }} does not exist, creating PAT..."
+
+                # Create Personal Access Token (PAT) - 179 days expiration
+                echo "Creating Personal Access Token..."
+                PAT_RESPONSE=$(curl -s -X POST "$DREMIO_HOST/api/v3/user/$USER_ID/token" \
+                  -H "Authorization: Bearer $TOKEN" \
+                  -H "Content-Type: application/json" \
+                  -d '{
+                    "label": "Kafka Connector Server Access Token",
+                    "millisecondsToExpire": 15465600000
+                  }')
+                PAT="$PAT_RESPONSE"
+                if [ -z "$PAT" ]; then
+                  echo "Failed to create PAT"
+                  echo "PAT response: $PAT_RESPONSE"
+                  exit 1
+                fi
+                echo "Successfully created PAT"
+
+                echo "Creating secret {{ .Values.global.patSecretName }}..."
+                kubectl create secret generic {{ .Values.global.patSecretName }} \
+                  --namespace={{ .Release.Namespace }} --from-literal=pat=$PAT \
+                  --dry-run=client -o yaml | kubectl --namespace={{ .Release.Namespace }} apply -f -
+                echo "Secret {{ .Values.global.patSecretName }} created successfully"
+              fi
+              
+              # Create default catalog
+              echo "Creating default catalog 'dremio-catalog'..."
+              CATALOG_PAYLOAD=$(cat <<EOF
+              {"name":"dremio-catalog","config":{"defaultStorageUri":"s3://dremio/catalog","storageAccessCredential":"CREDENTIAL_VENDING","storageProvider":"AWS","credentialType":"ACCESS_KEY","azureAuthenticationType":"ACCESS_KEY","googleAuthenticationType":"SERVICE_ACCOUNT_KEYS","secure":true,"propertyList":[],"enableAsync":true,"isCachingEnabled":true,"maxCacheSpacePct":100,"enableAutoOptimization":true,"enableTableCleanup":true},"accelerationRefreshPeriod":3600000,"accelerationGracePeriod":10800000,"accelerationActivePolicyType":"PERIOD","accelerationRefreshSchedule":"0 0 8 * * *","accelerationRefreshOnDataChanges":false,"metadataPolicy":{"deleteUnavailableDatasets":true,"namesRefreshMillis":3600000,"datasetDefinitionRefreshAfterMillis":3600000,"datasetDefinitionExpireAfterMillis":10800000,"authTTLMillis":86400000,"updateMode":"PREFETCH_QUERIED"},"accessControlList":{"userControls":[{"id":"$USER_ID","permissions":["ALTER","CREATE_TABLE","DROP","INSERT","DELETE","UPDATE","TRUNCATE","VIEW_REFLECTION","ALTER_REFLECTION","MODIFY","MANAGE_GRANTS","SELECT"]}],"roleControls":[]},"type":"DREMIO_CATALOG_V1"}
+              EOF
+              )
+              CATALOG_RESPONSE=$(curl -s -X PUT "$DREMIO_HOST/apiv2/source/dremio-catalog" \
+                -H "Content-Type: application/json" \
+                -H "Authorization: _dremio$TOKEN" \
+                -d "$CATALOG_PAYLOAD")
+              echo "Catalog creation response: $CATALOG_RESPONSE"
+              CATALOG_ID=$(echo "$CATALOG_RESPONSE" | jq -r '.id')
+              CATALOG_TAG=$(echo "$CATALOG_RESPONSE" | jq -r '.tag')
+              sleep 3
+
+              echo "Creating default engine..."
+              ENGINE_RESPONSE=$(curl -s -X POST "$DREMIO_HOST/api/v3/engines" \
+                -H "Content-Type: application/json" \
+                -H "Authorization: _dremio$TOKEN" \
+                -d '{"name":"default","spec":{"targetCpuCapacity":"4C","size":"XSmall","idleTimeout":"PT15M","c3StorageSize":"5GB","spillStorageSize":"5GB","executorPodMetadata":{"annotations":{},"labels":{},"nodeSelectors":{},"tolerations":[]}}}')
+              echo "Engine creation response: $ENGINE_RESPONSE"
+              sleep 3
+
+              echo "Starting Dremio Engine..."
+              ENGINE_ID=$(echo "$ENGINE_RESPONSE" | jq -r '.id')
+              echo "Engine ID: $ENGINE_ID"
+
+              if [ "$ENGINE_ID" != "null" ]; then
+                START_ENGINE_RESPONSE=$(curl -s -X PUT "$DREMIO_HOST/api/v3/engines/$ENGINE_ID/start" \
+                  -H "Content-Type: application/json" \
+                  -H "Authorization: _dremio$TOKEN")
+                echo "Engine start response: $START_ENGINE_RESPONSE"
+                sleep 3
+              fi
+
+              echo "Retrieving WLM rules..."
+              WLM_RULES=$(curl -s -X GET "$DREMIO_HOST/api/v3/wlm/rule" \
+                -H "Content-Type: application/json" \
+                -H "Authorization: _dremio$TOKEN")
+              echo "WLM rules retrieved successfully"
+
+              echo "Creating Autonomous Reflections queue..."
+              QUEUE_RESPONSE=$(curl -s -X POST "$DREMIO_HOST/api/v3/wlm/queue" \
+                -H "Content-Type: application/json" \
+                -H "Authorization: _dremio$TOKEN" \
+                -d '{"cpuTier":"MEDIUM","engineId":"default","maxAllowedRunningJobs":10,"maxStartTimeoutMs":300000,"name":"Autonomous Reflections"}')
+              echo "Queue creation response: $QUEUE_RESPONSE"
+
+              QUEUE_ID=$(echo "$QUEUE_RESPONSE" | jq -r '.id')
+              echo "Queue ID: $QUEUE_ID"
+
+              if [ "$QUEUE_ID" != "null" ]; then
+                NEW_RULE=$(cat <<'EOF'
+              {
+                "acceptId": "QUEUE_ID_PLACEHOLDER",
+                "action": "PLACE",
+                "conditions": "query_type() = 'Autonomous Reflections'",
+                "name": "Autonomous Reflections",
+                "rejectMessage": ""
+              }
+              EOF
+              )
+                NEW_RULE=$(echo "$NEW_RULE" | sed "s/QUEUE_ID_PLACEHOLDER/$QUEUE_ID/")
+
+                # Add the new rule to the beginning of the rules array
+                UPDATED_WLM_RULES=$(echo "$WLM_RULES" | jq --argjson newRule "$NEW_RULE" '.rules = [$newRule] + .rules')
+
+                echo "Updating WLM rules..."
+                WLM_UPDATE_RESPONSE=$(curl -s -X PUT "$DREMIO_HOST/api/v3/wlm/rule" \
+                  -H "Content-Type: application/json" \
+                  -H "Authorization: _dremio$TOKEN" \
+                  -d "$UPDATED_WLM_RULES")
+                echo "WLM rules update response: $WLM_UPDATE_RESPONSE"
+              fi
+
+              echo "Enabling autonomous reflections..."
+              REFLECTION_RESPONSE=$(curl -s -X PUT "$DREMIO_HOST/apiv2/settings/reflection.recommender.autonomous_mode.enabled" \
+                -H "Content-Type: application/json" \
+                -H "Authorization: _dremio$TOKEN" \
+                -d '{"type":"BOOLEAN","id":"reflection.recommender.autonomous_mode.enabled","value":true}')
+              echo "Autonomous reflections response: $REFLECTION_RESPONSE"
+
+              echo "Updating Samples source configuration..."
+              SAMPLES_RESPONSE=$(curl -s -X PUT "$DREMIO_HOST/apiv2/source/Samples" \
+                -H "Content-Type: application/json" \
+                -H "Authorization: _dremio$TOKEN" \
+                -d '{"config":{"externalBucketList":["samples.dremio.com"],"credentialType":"NONE","secure":false,"propertyList":[{"name": "fs.s3a.endpoint", "value": "s3.us-west-2.amazonaws.com"}]},"name":"Samples","accelerationRefreshPeriod":3600000,"accelerationGracePeriod":10800000,"accelerationNeverRefresh":true,"accelerationNeverExpire":true,"accelerationActivePolicyType":"PERIOD","accelerationRefreshSchedule":"0 0 8 * * *","accelerationRefreshOnDataChanges":false,"type":"S3"}')
+              echo "Samples source update response: $SAMPLES_RESPONSE"
+              sleep 3
+
+              echo "Setting folder format for NYC taxi trips Iceberg data..."
+              FOLDER_FORMAT_RESPONSE=$(curl -s -X PUT "$DREMIO_HOST/apiv2/source/Samples/folder_format/samples.dremio.com/NYC-taxi-trips-iceberg" \
+                -H "Content-Type: application/json" \
+                -H "Authorization: _dremio$TOKEN" \
+                -d '{"type":"Iceberg"}')
+              echo "Folder format response: $FOLDER_FORMAT_RESPONSE"
+              sleep 3
+
+              echo "Setting file format for SF weather CSV data..."
+              FILE_FORMAT_RESPONSE=$(curl -s -X PUT "$DREMIO_HOST/apiv2/source/Samples/file_format/samples.dremio.com/SF%20weather%202018-2019.csv" \
+                -H "Content-Type: application/json" \
+                -H "Authorization: _dremio$TOKEN" \
+                -d '{"fieldDelimiter":",","quote":"\"","comment":"#","lineDelimiter":"\r\n","escape":"\"","extractHeader":true,"trimHeader":true,"skipFirstLine":false,"type":"Text"}')
+              echo "File format response: $FILE_FORMAT_RESPONSE"
+              sleep 3
+
+              echo "Setting file format for NYC weather CSV data..."
+              NYC_FILE_FORMAT_RESPONSE=$(curl -s -X PUT "$DREMIO_HOST/apiv2/source/Samples/file_format/samples.dremio.com/NYC-weather.csv" \
+                -H "Content-Type: application/json" \
+                -H "Authorization: _dremio$TOKEN" \
+                -d '{"fieldDelimiter":",","quote":"\"","comment":"#","lineDelimiter":"\r\n","escape":"\"","extractHeader":true,"trimHeader":true,"skipFirstLine":false,"type":"Text"}')
+              echo "NYC file format response: $NYC_FILE_FORMAT_RESPONSE"
+
+              echo "All Dremio resources created successfully!"
+              
+          env:
+            - name: DREMIO_USERNAME
+              value: {{ .Values.global.dremioUsername | quote }}
+            - name: DREMIO_PASSWORD
+              value: {{ .Values.global.dremioPassword | quote }}
+{{- end }}

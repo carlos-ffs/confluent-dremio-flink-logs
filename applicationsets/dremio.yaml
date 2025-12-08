@@ -1,0 +1,65 @@
+apiVersion: argoproj.io/v1alpha1
+kind: ApplicationSet
+metadata:
+  name: dremio-appset
+spec:
+  generators:
+  - list:
+      elements:
+      - cluster: docker-k8s
+        url: https://kubernetes.default.svc
+  template:
+    metadata:
+      name: 'dremio-{{cluster}}'
+    spec:
+      project: local-project
+      source:
+        repoURL: https://github.com/carlos-ffs/confluent-dremio-flink-logs.git
+        targetRevision: HEAD
+        path: charts/dremio
+        helm:
+          releaseName: dremio
+          valueFiles: 
+          - values.yaml
+      destination:
+        server: '{{url}}'
+        namespace: dremio
+      syncPolicy:
+        automated:
+          prune: true  # Automatically delete resources that no longer exist in Git
+          selfHeal: true  # Automatically sync if drift is detected
+          allowEmpty: true  # Allows deleting all resources when they are no longer in Git
+        syncOptions:
+        - CreateNamespace=true
+        - RespectIgnoreDifferences=true
+        - ServerSideApply=true
+      ignoreDifferences:
+      - kind: Secret
+        name: dremio-license
+        namespace: dremio
+        jsonPointers:
+        - /data
+        - /stringData
+      - kind: Secret
+        name: dremio-mongodb-app-users
+        namespace: dremio
+        jsonPointers:
+        - /data
+        - /stringData
+      - group: psmdb.dremio.com
+        kind: PerconaServerMongoDB
+        jqPathExpressions:
+        - .spec.replsets[].sidecars[]
+      - group: batch
+        kind: Job
+        name: minio-wait-for-job
+        namespace: dremio
+      - group: batch
+        kind: Job
+        name: dremio-cluster-id
+        namespace: dremio
+      - group: apps
+        kind: StatefulSet
+        jqPathExpressions:
+          - .spec.volumeClaimTemplates[].apiVersion
+          - .spec.volumeClaimTemplates[].kind

@@ -1,0 +1,151 @@
+apiVersion: platform.confluent.io/v1beta1
+kind: ConfluentRolebinding
+metadata:
+  name: fluent-bit-user-rbac
+  namespace: {{ .Release.Namespace }}
+spec:
+  principal:
+    name: fluent-bit-user
+    type: user
+  resourcePatterns:
+  - name: "fluent-bit"
+    patternType: LITERAL
+    resourceType: Topic
+  role: ResourceOwner
+  kafkaRestClassRef:
+    name: default
+    namespace: {{ .Release.Namespace }}
+---
+apiVersion: platform.confluent.io/v1beta1
+kind: ConfluentRolebinding
+metadata:
+  name: test-user-rbac
+  namespace: {{ .Release.Namespace }}
+spec:
+  principal:
+    name: test-user
+    type: user
+  resourcePatterns:
+  - name: "test-"
+    patternType: PREFIXED
+    resourceType: Topic
+  role: ResourceOwner
+  kafkaRestClassRef:
+    name: default
+    namespace: {{ .Release.Namespace }}
+---
+apiVersion: platform.confluent.io/v1beta1
+kind: ConfluentRolebinding
+metadata:
+  name: kafka-connect-rbac
+  namespace: {{ .Release.Namespace }}
+spec:
+  principal:
+    name: kafka
+    type: user
+  role: SystemAdmin
+  clustersScopeByIds:
+    connectClusterId: confluent.connect
+---
+apiVersion: platform.confluent.io/v1beta1
+kind: ConfluentRolebinding
+metadata:
+  name: connect-systemadmin-rbac
+  namespace: {{ .Release.Namespace }}
+spec:
+  principal:
+    name: connect
+    type: user
+  role: SystemAdmin
+  clustersScopeByIds:
+    connectClusterId: confluent.connect
+---
+apiVersion: platform.confluent.io/v1beta1
+kind: ConfluentRolebinding
+metadata:
+  name: connect-fluent-bit-topic-rbac
+  namespace: {{ .Release.Namespace }}
+spec:
+  principal:
+    name: connect
+    type: user
+  resourcePatterns:
+  - name: "fluent-bit"
+    patternType: LITERAL
+    resourceType: Topic
+  role: ResourceOwner
+  kafkaRestClassRef:
+    name: default
+    namespace: {{ .Release.Namespace }}
+---
+apiVersion: platform.confluent.io/v1beta1
+kind: ConfluentRolebinding
+metadata:
+  name: connect-consumer-group-rbac
+  namespace: {{ .Release.Namespace }}
+spec:
+  principal:
+    name: connect
+    type: user
+  resourcePatterns:
+  - name: "connect-iceberg-sink-connector"
+    patternType: PREFIXED
+    resourceType: Group
+  role: ResourceOwner
+  kafkaRestClassRef:
+    name: default
+    namespace: {{ .Release.Namespace }}
+---
+apiVersion: platform.confluent.io/v1beta1
+kind: ConfluentRolebinding
+metadata:
+  name: connect-transactional-id-rbac
+  namespace: {{ .Release.Namespace }}
+spec:
+  principal:
+    name: connect
+    type: user
+  resourcePatterns:
+  - name: "coordinator-fluent-bit"
+    patternType: PREFIXED
+    resourceType: TransactionalId
+  role: ResourceOwner
+  kafkaRestClassRef:
+    name: default
+    namespace: {{ .Release.Namespace }}
+---
+apiVersion: platform.confluent.io/v1beta1
+kind: ConfluentRolebinding
+metadata:
+  name: connect-control-iceberg-topic-rbac
+  namespace: {{ .Release.Namespace }}
+spec:
+  principal:
+    name: connect
+    type: user
+  resourcePatterns:
+  - name: "control-iceberg"
+    patternType: LITERAL
+    resourceType: Topic
+  role: ResourceOwner
+  kafkaRestClassRef:
+    name: default
+    namespace: {{ .Release.Namespace }}
+---
+apiVersion: platform.confluent.io/v1beta1
+kind: ConfluentRolebinding
+metadata:
+  name: connect-control-consumer-group-rbac
+  namespace: {{ .Release.Namespace }}
+spec:
+  principal:
+    name: connect
+    type: user
+  resourcePatterns:
+  - name: "cg-control-"
+    patternType: PREFIXED
+    resourceType: Group
+  role: ResourceOwner
+  kafkaRestClassRef:
+    name: default
+    namespace: {{ .Release.Namespace }}

@@ -1,0 +1,9 @@
+apiVersion: v1
+kind: Secret
+metadata:
+  name: ca-pair-sslcerts
+  namespace: {{ .Release.Namespace }}
+type: kubernetes.io/tls
+data:
+  tls.crt: {{ .Files.Get "tls/ca.pem" | b64enc }}
+  tls.key: {{ .Files.Get "tls/ca-key.pem" | b64enc }}

@@ -1,0 +1,76 @@
+apiVersion: argoproj.io/v1alpha1
+kind: AppProject
+metadata:
+  name: local-project
+  namespace: argocd
+  annotations:
+    "helm.sh/hook": post-install,post-upgrade
+    "helm.sh/resource-policy": keep
+spec:
+  sourceRepos:
+  - 'https://github.com/carlos-ffs/confluent-dremio-flink-logs.git'
+  - 'https://argoproj.github.io/argo-helm'
+  - 'https://github.com/minio/minio'
+  - 'https://prometheus-community.github.io/helm-charts'
+  - 'https://grafana.github.io/helm-charts'
+  - 'oci://quay.io/dremio/dremio-helm'
+  - 'https://charts.min.io/'
+  - 'https://packages.confluent.io/helm'
+  destinations:
+    # For simplicity
+    - namespace: '*'
+      server: https://kubernetes.default.svc
+    # - namespace: argocd
+    #   server: https://kubernetes.default.svc
+    # - namespace: argo-workflows
+    #   server: https://kubernetes.default.svc
+    # - namespace: argo-events
+    #   server: https://kubernetes.default.svc
+    # - namespace: minio
+    #   server: https://kubernetes.default.svc
+    # - namespace: dremio
+    #   server: https://kubernetes.default.svc
+    # - namespace: monitoring
+    #   server: '*'
+    # - namespace: kube-system
+    #   server: '*'
+  clusterResourceWhitelist:
+    - group: '*'
+      kind: '*'
+---
+apiVersion: argoproj.io/v1alpha1
+kind: ApplicationSet
+metadata:
+  name: root-appset
+  namespace: argocd
+  annotations:
+    "helm.sh/hook": post-install,post-upgrade
+spec:
+  goTemplate: true
+  goTemplateOptions: ["missingkey=error"]
+  generators:
+  - list:
+      elements:
+      - cluster: docker-k8s
+        url: https://kubernetes.default.svc
+  template:
+    metadata:
+      name: '{{`{{.cluster}}`}}-root-appset'
+    spec:
+      project: local-project
+      source:
+        repoURL: https://github.com/carlos-ffs/confluent-dremio-flink-logs.git
+        targetRevision: main
+        path: applicationsets
+      destination:
+        server: '{{`{{.url}}`}}'
+        namespace: argocd
+      syncPolicy:
+        automated:
+          prune: true  # Automatically delete resources that no longer exist in Git
+          selfHeal: true  # Automatically sync if drift is detected
+          allowEmpty: true  # Allows deleting all resources when they are no longer in Git
+        syncOptions:
+        - CreateNamespace=true
+        - PrunePropagationPolicy=foreground  # Ensures children are deleted first
+        - PruneLast=true  # Deletes resources last, after applying new ones

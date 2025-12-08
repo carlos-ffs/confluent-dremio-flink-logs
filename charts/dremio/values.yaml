@@ -1,0 +1,257 @@
+# For samples source check this: https://community.dremio.com/t/cannot-access-dremio-samples-after-adding-minio-for-distributed-storager/12018/2
+
+minio:
+  enabled: true
+  fullnameOverride: "minio"
+  mode: standalone
+  replicas: 1
+  rootUser: &minioRootUser "minio"
+  rootPassword: "minio123"
+  persistence:
+    enabled: true
+    size: 5Gi
+  resources:
+    requests:
+      memory: "512Mi"
+  buckets:
+  - name: &dremioBucketName "dremio"
+    policy: none
+    purge: false
+    versioning: false
+    objectlocking: false
+  svcaccts: 
+  - accessKey: &dremioMinioUser "dremio-minio-user"
+    secretKey: &dremioMinioPassword "dremio-minio-123"
+    user: console
+    policy:
+      statements:
+        - resources:
+            - 'arn:aws:s3:::dremio/*'
+          actions:
+            - "s3:*"
+
+global:
+  createDremioDefaultResources: true
+  # We set -Ddebug.addDefaultUser=true, so we can use default username/password to login which is dremio/dremio123
+  dremioUsername: "dremio"
+  dremioPassword: "dremio123"
+  patSecretName: "dremio-root-pat"
+
+dremio-helm:
+  enabled: true
+  devMode: true # Needs to be set to true to define replicas 1 in mongodb.
+  imagePullSecrets:
+    - dremio-pull-secret
+  dremio:
+    license: "<YOUR_DREMIO_LICENSE_KEY>"
+  coordinator:
+    extraStartParams: "-Ddebug.addDefaultUser=true -Ddremio.eula.disabled=true -Ddremio.debug.sysopt.auth.personal-access-tokens.enabled=true"
+    resources:
+      requests:
+        cpu: "2"
+        memory: "4Gi"
+      limits:
+        memory: "4Gi"
+    volumeSize: 5Gi
+    log:
+      volume:
+        size: 2Gi
+
+  # For classic engine. Use elastic engine instead.
+  # https://docs.dremio.com/current/deploy-dremio/configuring-kubernetes/#configuration-of-classic-engines
+  executor:
+    resources:
+      requests:
+        cpu: "2"
+        memory: "4Gi"
+      limits:
+        memory: "4Gi"
+    engines: [] # ["default"]
+    count: 0
+    volumeSize: 5Gi
+
+  engine:
+    options:
+      resourceAllocationOffsets:
+        # Represents 2 CPUs and 4 Gi of memory​
+        defaultOffset: reserve-2-4
+      sizes:
+        # CPU per pod = comes from targetCpuCapacities
+        - name: XSmall
+          cpuScaleFactor: 1.0
+          pods: 1
+          memory: 8Gi # It really means 4Gi
+        - name: Small
+          cpuScaleFactor: 1.0
+          pods: 2
+          memory: 8Gi # It really means 4Gi
+        - name: Medium
+          cpuScaleFactor: 1.0
+          pods: 3
+          memory: 8Gi # It really means 4Gi
+      # For Kubernetes deployments, the number of CPUs for each component can be specified in the
+      # Helm chart. Reserve 2 CPUs for Kubernetes system pods and operating system; e.g., if the
+      # node has 16 CPUs, you would allocate 14 to Dremio. If the node has 32 CPUs, you would
+      # allocate 30 CPUs.
+      targetCpuCapacities:
+        capacities:
+          - name: 4C # It really means 2 cpu per pod for the engine
+            cpu: 4
+          - name: 6C # It really means 4 cpu per pod for the engine
+            cpu: 6
+        defaultCapacity: 4C # Really means 2 CPU per pod for the engine
+      storage:
+        spillStorageSizes:
+          - name: 5GB
+            storage: 5Gi
+          - name: 10GB
+            storage: 10Gi
+          - name: 20GB
+            storage: 20Gi
+        defaultSpillStorageSize: 5GB
+        c3StorageSizes:
+          - name: 5GB
+            storage: 5Gi
+          - name: 10GB
+            storage: 10Gi
+        defaultC3StorageSize: 5GB
+    operator:
+      serviceAccount: dremio-engine-operator
+    executor:
+      serviceAccount: dremio-engine-executor
+
+  zookeeper:
+    resources:
+      requests:
+        cpu: "500m"
+        memory: "1Gi"
+      limits:
+        memory: "1Gi"
+    count: 1
+    volumeSize: 2Gi
+  
+  distStorage:
+    type: "aws"
+    aws:
+      bucketName: *dremioBucketName
+      path: "/"
+      authentication: "accessKeySecret"
+      credentials:
+        accessKey: *dremioMinioUser
+        secret: *dremioMinioPassword
+      extraProperties: |
+        <property>
+          <name>fs.s3a.endpoint</name>
+          <value>minio.dremio.svc.cluster.local:9000</value>
+        </property>
+        <property>
+          <name>fs.s3a.path.style.access</name>
+          <value>true</value>
+        </property>
+        <property>
+          <name>dremio.s3.compat</name>
+          <value>true</value>
+        </property>
+        <property>
+          <name>fs.s3a.connection.ssl.enabled</name>
+          <value>false</value>
+        </property>
+        
+  catalog:
+    replicas: 1
+    resources:
+      requests:
+        cpu: "500m"
+        memory: "1Gi"
+      limits:
+        cpu: "1500m"
+        memory: "1Gi"
+    storage:
+      location: s3://dremio/catalog
+      type: "s3"
+      s3:
+        endpoint: http://minio.dremio.svc.cluster.local:9000
+        region: us-east-1
+        useAccessKeys: true
+        roleArn: arn:aws:iam::000000000000:role/catalog-access-role
+        secretName: catalog-minio-secret
+        skipSts: true
+        pathStyleAccess: true
+    externalAccess:
+      enabled: true
+      replicas: 1
+      authentication:
+        authServerHostname: dremio-master-0.dremio-cluster-pod.{{ .Release.Namespace }}.svc.cluster.local
+        disableHostnameVerification: false
+      tls:
+        enabled: false
+        secret: dremio-tls-secret-catalog
+
+  catalogservices:
+    enabled: true
+    serviceAccount: dremio-catalog-services
+    replicas: 1
+    resources:
+      requests:
+        cpu: "500m"
+        memory: "512Mi"
+      limits:
+        cpu: "1"
+        memory: "1Gi"
+
+  mongodb:
+    serviceAccount: dremio-mongodb
+    replicaCount: 1
+    resources:
+      requests:
+        cpu: 500m
+        memory: 512Mi
+      limits:
+        cpu: 1
+        memory: 1Gi
+    storage:
+      resources:
+        requests:
+          storage: 5Gi
+      accessModes:
+      - ReadWriteOnce
+
+
+  opensearchOperator:
+    useRoleBindings: false
+
+  # Requires atleast 8gb of memory. For dev purposes, we gonna disable it.
+  opensearch:
+    enabled: false
+    volumeSize: "5Gi"
+    resources:
+      requests:
+        memory: "8Gi"
+        cpu: "1"
+      limits: 
+        memory: "8Gi"
+        cpu: "3"
+
+  nats:
+    enabled: true
+    config:
+      jetstream:
+        enabled: true
+        fileStore:
+          pvc:
+            size: 2Gi
+      cluster:
+        enabled: true
+        replicas: 3
+    resources:
+      requests:
+        cpu: "500m"
+        memory: "512Mi"
+        ephemeral-storage: "50Mi"
+      limits:
+        cpu: "750m"
+        memory: "1024Mi"
+        ephemeral-storage: "2G"
+
+  telemetry:
+    enabled: false

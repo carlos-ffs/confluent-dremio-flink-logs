@@ -1,0 +1,19 @@
+apiVersion: v2
+name: dremio-minio
+version: 1.0.0
+appVersion: v1.0.0
+kubeVersion: "^1.21.0-0"
+description: "Dremio and Minio stack"
+home: https://www.dremio.com/
+sources:
+- https://github.com/dremio/dremio
+dependencies:
+  - name: dremio-helm
+    condition: dremio-helm.enabled
+    version: "3.1.5"
+    repository: "oci://quay.io/dremio"
+  - name: minio
+    condition: minio.enabled
+    version: "5.4.0"
+    alias: minio
+    repository: "https://charts.min.io/"

@@ -1,0 +1,56 @@
+apiVersion: platform.confluent.io/v1beta1
+kind: Connector
+metadata:
+  name: fluent-bit-dremio-sink
+spec:
+  class: "org.apache.iceberg.connect.IcebergSinkConnector"
+  name: "iceberg-sink-connector"
+  taskMax: 2
+  connectRest:
+    endpoint: https://connect.confluent.svc.cluster.local:8083
+    authentication:
+      type: bearer
+      bearer:
+        secretRef: mds-client
+  connectClusterRef:
+    name: connect
+    namespace: {{ .Release.Namespace }}
+  configs:
+    topics: "fluent-bit"
+    iceberg.tables: "fluent_bit.logs"
+    iceberg.tables.dynamic-enabled: "false"
+    iceberg.tables.auto-create-enabled: "true"
+    iceberg.tables.schema-force-optional: "true"
+    iceberg.catalog.cache-enabled: "false"
+
+    # S3/MinIO configuration
+    iceberg.catalog.io-impl: "org.apache.iceberg.aws.s3.S3FileIO"
+    iceberg.catalog.s3.endpoint: "http://minio.dremio.svc.cluster.local:9000"
+    iceberg.catalog.s3.path-style-access: "true"
+    iceberg.catalog.client.region: "us-east-1"
+    iceberg.catalog.s3.region: "us-east-1"
+    iceberg.catalog.s3.access-key-id: "dremio-minio-user"
+    iceberg.catalog.s3.secret-access-key: "dremio-minio-123"
+    
+    iceberg.catalog.type: "rest"
+    iceberg.catalog.uri: "http://dremio-client.dremio.svc.cluster.local:8181/api/catalog"
+    iceberg.catalog.warehouse: "default"
+    iceberg.catalog.rest.auth.type: "com.dremio.iceberg.authmgr.oauth2.OAuth2Manager"
+    iceberg.catalog.rest.auth.oauth2.token-endpoint: "http://dremio-client.dremio.svc.cluster.local:9047/oauth/token"
+    iceberg.catalog.rest.auth.oauth2.grant-type: "urn:ietf:params:oauth:grant-type:token-exchange"
+    iceberg.catalog.rest.auth.oauth2.client-auth: "none"
+    iceberg.catalog.rest.auth.oauth2.client-id: "dremio"
+    iceberg.catalog.rest.auth.oauth2.scope: "dremio.all"
+    # Dremio PAT
+    iceberg.catalog.rest.auth.oauth2.token-exchange.subject-token: "syde7RQlSvuhKfK+TZIY/16sypU0g+jaTOc5PMiqKpiOTKYCnEHaZcHRbCLlsw=="
+    iceberg.catalog.rest.auth.oauth2.token-exchange.subject-token-type: "urn:ietf:params:oauth:token-type:dremio:personal-access-token"
+
+    iceberg.coordinator.transactional.prefix: "coordinator-fluent-bit"
+
+    # Connector behavior settings
+    iceberg.control.commit.interval-ms: "60000"
+    iceberg.control.commit.timeout-ms: "10000"
+    # Data format settings
+    value.converter: "org.apache.kafka.connect.json.JsonConverter"
+    value.converter.schemas.enable: "false"
+    key.converter: "org.apache.kafka.connect.storage.StringConverter"
