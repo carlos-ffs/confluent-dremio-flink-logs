@@ -8,14 +8,15 @@ metadata:
     "helm.sh/resource-policy": keep
 spec:
   sourceRepos:
-  - 'https://github.com/carlos-ffs/confluent-dremio-fluentbit-logs.git'
-  - 'https://argoproj.github.io/argo-helm'
-  - 'https://github.com/minio/minio'
-  - 'https://prometheus-community.github.io/helm-charts'
-  - 'https://grafana.github.io/helm-charts'
-  - 'oci://quay.io/dremio/dremio-helm'
-  - 'https://charts.min.io/'
-  - 'https://packages.confluent.io/helm'
+  - '*' # For simplicity
+  # - 'https://github.com/carlos-ffs/confluent-dremio-fluentbit-logs.git'
+  # - 'https://argoproj.github.io/argo-helm'
+  # - 'https://github.com/minio/minio'
+  # - 'https://prometheus-community.github.io/helm-charts'
+  # - 'https://grafana.github.io/helm-charts'
+  # - 'oci://quay.io/dremio/dremio-helm'
+  # - 'https://charts.min.io/'
+  # - 'https://packages.confluent.io/helm'
   destinations:
     # For simplicity
     - namespace: '*'
@@ -35,6 +36,7 @@ spec:
     # - namespace: kube-system
     #   server: '*'
   clusterResourceWhitelist:
+    # For simplicity
     - group: '*'
       kind: '*'
 ---

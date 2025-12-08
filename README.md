@@ -151,6 +151,14 @@ graph TB
 
 Fork this repository to your own GitHub account so you can make changes and have ArgoCD sync from your fork.
 
+Update all the references to `github.com/carlos-ffs/confluent-dremio-fluentbit-logs.git` to your forked repository. These are the files that need to be updated:
+
+  -  `applicationsets/confluent-resources.yaml` (line [17](https://github.com/carlos-ffs/confluent-dremio-fluentbit-logs/blob/main/applicationsets/confluent-resources.yaml#L17))
+  - `applicationsets/dremio.yaml` (line [17](https://github.com/carlos-ffs/confluent-dremio-fluentbit-logs/blob/main/applicationsets/dremio.yaml#L17))
+  -  `applicationsets/fluent-bit.yaml` (line [17](https://github.com/carlos-ffs/confluent-dremio-fluentbit-logs/blob/main/applicationsets/fluent-bit.yaml#L17))
+  -  `applicationsets/kube-prometheus-stack.yaml` (line [17](https://github.com/carlos-ffs/confluent-dremio-fluentbit-logs/blob/main/applicationsets/kube-prometheus-stack.yaml#L17))
+  -  `charts/argo-cd/templates/argocd-init.yaml` (line [65](https://github.com/carlos-ffs/confluent-dremio-fluentbit-logs/blob/main/charts/argo-cd/templates/argocd-init.yaml#L65))
+
 ### Step 2: Configure Private Repository Access (If Applicable)
 
 If your forked repository is **private**, you need to configure ArgoCD with GitHub credentials:
