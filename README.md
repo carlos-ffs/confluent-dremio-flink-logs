@@ -43,8 +43,9 @@ The workshop sets up the following components:
 The workshop implements a complete log analytics pipeline with the following data flow:
 
 ```mermaid
-graph TB
+graph TD
     subgraph k8s["Kubernetes Cluster"]
+        direction TB
         pods["Pod Logs<br/>(stdout/stderr)<br/>All Namespaces"]
 
         subgraph fluent["Log Collection Layer"]
@@ -52,12 +53,15 @@ graph TB
         end
 
         subgraph confluent["Confluent Platform"]
+            direction TB
             kafka["Kafka Brokers (3 nodes)<br/>📨 Topic: fluent-bit<br/>⏱️ Retention: 1h / 500MB<br/>🔒 SASL_SSL encrypted"]
             connect["Kafka Connect (3 workers)<br/>Iceberg Sink Connector<br/>⚙️ Batch commits every 60s"]
+            kafka --> connect
         end
 
         subgraph dremio["Dremio Platform"]
-            catalog["Dremio Catalog Services<br/>REST Catalog API<br/>🔐 OAuth2 authentication<br/>Table: fluent_bit.logs"]
+            direction TB
+            catalog["Dremio Catalog Services<br/>REST Catalog API<br/>Table: fluent_bit.logs <br/>🔐 OAuth2 authentication"]
             coordinator["Dremio Coordinator + Executors<br/>🔍 SQL Query Engine<br/>⏮️ Time travel queries<br/>📈 Real-time analytics"]
         end
 
@@ -66,11 +70,10 @@ graph TB
         end
     end
 
-    pods ==>|"JSON logs with<br/>K8s metadata"| fb
-    fb ==>|"Streaming events<br/>(encrypted)"| kafka
-    kafka ==>|"Consume from<br/>fluent-bit topic"| connect
-    connect ==>|"Iceberg write ops<br/>(REST API)"| catalog
-    catalog ==>|"Parquet files +<br/>metadata"| minio
+    pods -->|"JSON logs with<br/>K8s metadata"| fb
+    fb -->|"Streaming events<br/>(encrypted)"| kafka
+    connect -->|"Iceberg write ops<br/>(REST API)"| catalog
+    catalog -.->|"Parquet files +<br/>metadata"| minio
     minio -.->|"Read Iceberg<br/>tables"| coordinator
 
     style pods fill:#e1f5ff,stroke:#0288d1,stroke-width:2px,color:#000
