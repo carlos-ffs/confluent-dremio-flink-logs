@@ -84,11 +84,11 @@ graph TD
     style coordinator fill:#e8f5e9,stroke:#388e3c,stroke-width:2px,color:#000
     style minio fill:#fce4ec,stroke:#c2185b,stroke-width:2px,color:#000
 
-    style k8s fill:none,stroke:#424242,stroke-width:3px,color:#000
-    style fluent fill:none,stroke:#f57c00,stroke-width:2px,stroke-dasharray: 5 5,color:#000
-    style confluent fill:none,stroke:#7b1fa2,stroke-width:2px,stroke-dasharray: 5 5,color:#000
-    style dremio fill:none,stroke:#388e3c,stroke-width:2px,stroke-dasharray: 5 5,color:#000
-    style storage fill:none,stroke:#c2185b,stroke-width:2px,stroke-dasharray: 5 5,color:#000
+    style k8s fill:none,stroke:#424242,stroke-width:3px,color:#424242
+    style fluent fill:none,stroke:#f57c00,stroke-width:2px,stroke-dasharray: 5 5,color:#f57c00
+    style confluent fill:none,stroke:#7b1fa2,stroke-width:2px,stroke-dasharray: 5 5,color:#7b1fa2
+    style dremio fill:none,stroke:#388e3c,stroke-width:2px,stroke-dasharray: 5 5,color:#388e3c
+    style storage fill:none,stroke:#c2185b,stroke-width:2px,stroke-dasharray: 5 5,color:#c2185b
 ```
 
 #### Pipeline Stages Explained
