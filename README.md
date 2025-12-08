@@ -54,15 +54,15 @@ graph TD
 
         subgraph confluent["Confluent Platform"]
             direction TB
-            kafka["Kafka Brokers (3 nodes)<br/>📨 Topic: fluent-bit<br/>⏱️ Retention: 1h / 500MB<br/>🔒 SASL_SSL encrypted"]
-            connect["Kafka Connect (3 workers)<br/>Iceberg Sink Connector<br/>⚙️ Batch commits every 60s"]
+            kafka["Kafka Brokers (3 nodes)<br/>Topic: fluent-bit<br/>Retention: 1h / 500MB<br/>SASL_SSL encrypted"]
+            connect["Kafka Connect (3 workers)<br/>Iceberg Sink Connector<br/>Batch commits every 60s"]
             kafka --> connect
         end
 
         subgraph dremio["Dremio Platform"]
             direction TB
-            catalog["Dremio Catalog Services<br/>REST Catalog API<br/>Table: fluent_bit.logs <br/>🔐 OAuth2 authentication"]
-            coordinator["Dremio Coordinator + Executors<br/>🔍 SQL Query Engine<br/>⏮️ Time travel queries<br/>📈 Real-time analytics"]
+            catalog["Dremio Catalog Services<br/>REST Catalog API<br/>Table: fluent_bit.logs <br/>OAuth2 authentication"]
+            coordinator["Dremio Coordinator + Executors<br/>SQL Query Engine<br/>Time travel queries<br/>Real-time analytics"]
         end
 
         subgraph storage["Object Storage"]
