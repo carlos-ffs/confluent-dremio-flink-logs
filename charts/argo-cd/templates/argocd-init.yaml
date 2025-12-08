@@ -75,5 +75,3 @@ spec:
           allowEmpty: true  # Allows deleting all resources when they are no longer in Git
         syncOptions:
         - CreateNamespace=true
-        - PrunePropagationPolicy=foreground  # Ensures children are deleted first
-        - PruneLast=true  # Deletes resources last, after applying new ones
