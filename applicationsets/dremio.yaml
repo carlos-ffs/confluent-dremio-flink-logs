@@ -34,6 +34,15 @@ spec:
         - RespectIgnoreDifferences=true
         - ServerSideApply=true
       ignoreDifferences:
+      # We ignore the license secret so we can manage it outside of GitOps.
+      # ArgoCD will create the secret on the first sync, and then ignore any changes.
+      # If you don't want to manually manage the secret (like scripts/run.sh does), 
+      # you can take advantage of external-secrets to manage the secret for you. 
+      # I advise to use spec.target.creationPolicy: 'Merge' in the external-secret CR.
+      # With Merge set the external-secret operator does not create a secret. Instead, 
+      # it expects the secret to already exist and does not create the secret, but merges in the data fields to the secret.
+      # Creation policy details: https://external-secrets.io/main/guides/ownership-deletion-policy/#creation-policy
+      # Check example here: https://external-secrets.io/main/api/externalsecret/#example
       - kind: Secret
         name: dremio-license
         namespace: dremio

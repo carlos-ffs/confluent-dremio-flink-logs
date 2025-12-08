@@ -188,7 +188,6 @@ kubectl cluster-info
 
 ### Step 4: Configure Dremio Secrets
 
-
 Edit `scripts/dremio-secrets.yaml` and replace the placeholder values:
 
 1. **Docker Pull Secret**: Get your Dremio Quay.io credentials and set the `<YOUR_BASE64_ENCODED_DOCKER_CONFIG_JSON>` value.
@@ -223,14 +222,20 @@ Run the main deployment script:
 ```
 
 This script will:
-1. Generate TLS certificates for Confluent Platform (optional, you can use the provided self-signed certs)
+1. Generate TLS certificates for Confluent Platform (if the provided self-signed certs don't exist in `charts/confluent-resources/tls`)
 2. Create the `argocd` namespace
 3. Install ArgoCD using Helm
 4. Apply private repository credentials (if `--private-repository` flag is used)
 5. Wait for Dremio namespace to be created
 6. Apply Dremio secrets
 
+> [!TIP] 
+> The Dremio secrets must be applied **after** the Dremio namespace is created. The `run.sh` script handles this automatically, but if you apply the secrets manually, make sure the Dremio namespace exists before applying the secrets.
+
 ### Step 7: Monitor Deployment
+
+> [!IMPORTANT] 
+> After ArgoCD is up and running, Dremio, Confluent, and Fluent Bit  will be deployed automatically. However, it will take a while for Dremio and Confluent pods to come up. Keep an eye on the logs and wait for all pods to be ready before proceeding to [Post-Deployment Configuration](#post-deployment-configuration).
 
 Watch the ArgoCD applications sync:
 
@@ -322,10 +327,6 @@ After checking that the connector is running and data is being written to Iceber
       -- WHERE data.log LIKE '%error%'
       ORDER BY timestamp_ DESC
    ```
-
-> [!TIP]
-> If you need to manually create or modify the source, see the API payload in `charts/dremio/templates/dremio-resources-creator.yaml` (lines 235-239).
-
 
 ### Common Issues
 

@@ -18,6 +18,7 @@ spec:
         targetRevision: HEAD
         path: charts/fluent-bit
         helm:
+          releaseName: fluent-bit
           valueFiles: 
           - values.yaml
       destination:
