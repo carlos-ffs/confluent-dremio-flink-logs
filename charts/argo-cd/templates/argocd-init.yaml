@@ -45,6 +45,7 @@ metadata:
   namespace: argocd
   annotations:
     "helm.sh/hook": post-install,post-upgrade
+    "helm.sh/resource-policy": keep
 spec:
   goTemplate: true
   goTemplateOptions: ["missingkey=error"]
