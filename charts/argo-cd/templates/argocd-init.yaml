@@ -8,7 +8,7 @@ metadata:
     "helm.sh/resource-policy": keep
 spec:
   sourceRepos:
-  - 'https://github.com/carlos-ffs/confluent-dremio-flink-logs.git'
+  - 'https://github.com/carlos-ffs/confluent-dremio-fluentbit-logs.git'
   - 'https://argoproj.github.io/argo-helm'
   - 'https://github.com/minio/minio'
   - 'https://prometheus-community.github.io/helm-charts'
@@ -59,7 +59,7 @@ spec:
     spec:
       project: local-project
       source:
-        repoURL: https://github.com/carlos-ffs/confluent-dremio-flink-logs.git
+        repoURL: https://github.com/carlos-ffs/confluent-dremio-fluentbit-logs.git
         targetRevision: main
         path: applicationsets
       destination:

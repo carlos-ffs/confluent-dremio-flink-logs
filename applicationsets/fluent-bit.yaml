@@ -14,7 +14,7 @@ spec:
     spec:
       project: local-project
       source:
-        repoURL: https://github.com/carlos-ffs/confluent-dremio-flink-logs.git
+        repoURL: https://github.com/carlos-ffs/confluent-dremio-fluentbit-logs.git
         targetRevision: HEAD
         path: charts/fluent-bit
         helm:

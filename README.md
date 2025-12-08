@@ -208,7 +208,7 @@ To build a custom version, see:
 > **[Build Iceberg Kafka Connector Documentation](docs/build-iceberg-kafka-connector.md)**
 
 > [!TIP] 
-> If you want to upload the pre-built connector to your own S3 bucket, you can download the zip file from [this release](https://github.com/carlos-ffs/confluent-dremio-flink-logs/releases/tag/iceberg-kafka-connect-with-authmgr-0.1.3) and upload it to your S3 bucket.
+> If you want to upload the pre-built connector to your own S3 bucket, you can download the zip file from [this release](https://github.com/carlos-ffs/confluent-dremio-fluentbit-logs/releases/tag/iceberg-kafka-connect-with-authmgr-0.1.3) and upload it to your S3 bucket.
 
 ### Step 6: Deploy the Stack
 
