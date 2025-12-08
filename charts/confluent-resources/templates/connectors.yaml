@@ -42,7 +42,7 @@ spec:
     iceberg.catalog.rest.auth.oauth2.client-id: "dremio"
     iceberg.catalog.rest.auth.oauth2.scope: "dremio.all"
     # Dremio PAT
-    iceberg.catalog.rest.auth.oauth2.token-exchange.subject-token: "syde7RQlSvuhKfK+TZIY/16sypU0g+jaTOc5PMiqKpiOTKYCnEHaZcHRbCLlsw=="
+    iceberg.catalog.rest.auth.oauth2.token-exchange.subject-token: "r6Hbh0LHQ3KyL/SX+K1n+JIQW0NlyN5l9YmW7K4RsMXIqkwBjuJcbPsNQ/TRZA=="
     iceberg.catalog.rest.auth.oauth2.token-exchange.subject-token-type: "urn:ietf:params:oauth:token-type:dremio:personal-access-token"
 
     iceberg.coordinator.transactional.prefix: "coordinator-fluent-bit"
