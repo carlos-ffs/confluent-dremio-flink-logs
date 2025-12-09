@@ -148,6 +148,9 @@ graph TD
 - **Disk**: 50GB+ free space
 - **Network**: Internet access for pulling container images
 
+> [!CAUTION] 
+> This setup is configured to work on a local Kubernetes cluster. It is NOT intended for production use, but rather as a solution to quickly deploy a log analytics pipeline for testing and evaluation purposes.
+
 ## Setup Instructions
 
 ### Step 1: Fork This Repository
